@@ -35,4 +35,23 @@ jobs:
           Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant ${{ secrets.AZURE_TENANT_ID }} -SubscriptionId 'c550fb2d-3f43-40b7-9e36-f1d47f436e42'
           Get-AzResourceGroup
 
+      - name: Create Az Policy using pwsh
+        shell: pwsh
+        run: |
+            $resource_group='icmelrg'
+            # AZ Policy with pwsh module
+
+            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"
+            
+            $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group
+            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName Test-FWPolicy-RG -FirewallPolicyName EUS-Policy
+            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName Test-FWPolicy-RG -AzureFirewallPolicyName EUS-Policy
+            
+            $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort * 
+            
+            $newrulecollectionconfig=New-AzFirewallPolicyFilterRuleCollection -Name myfirstrulecollection -Priority 1000 -Rule $networkrule1 -ActionType Allow
+            
+            $newrulecollection = $networkrulecollectiongroup.Properties.RuleCollection.Add($newrulecollectionconfig)
+            
+            Set-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -Priority "200" -FirewallPolicyObject $firewallpolicy -RuleCollection $networkrulecollectiongroup.Properties.RuleCollection
     
