@@ -31,7 +31,7 @@ jobs:
           
           az network vnet create -g $resource_group -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'
           
-          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name icnonpremvnet_sub --subnet-prefixes '10.5.0.0/24'
+          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name iconpremvnet_sub --subnet-prefixes '10.5.0.0/24'
           
           # -- Virtual Machines
           
