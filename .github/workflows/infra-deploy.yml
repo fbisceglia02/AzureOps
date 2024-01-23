@@ -91,6 +91,7 @@ jobs:
       - name: Create Az VHub on the WAN and configure spoke connections
         shell: pwsh
         run: |
+            $HubName = 'icsechub'
             $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location $Location -AddressPrefix "192.168.1.0/24" -Sku "Standard"
 
             $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
