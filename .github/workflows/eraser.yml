@@ -18,4 +18,4 @@ jobs:
       - name: Deploy Infrastructure
         shell: bash
         run: |
-            az group delete -n icmelrg
+            az group delete -n icmelrg --yes
