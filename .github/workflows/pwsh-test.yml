@@ -18,8 +18,9 @@ jobs:
       - name: Installing pwsh module
         shell: pwsh
         run: |
-          Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force
+          Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -Verbose
           Update-Module -Name Az -Scope CurrentUser -Force
+          Get-Module -Name Az
 
       - name: Connecting pwsh 
         shell: pwsh
