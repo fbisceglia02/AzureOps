@@ -48,13 +48,13 @@ jobs:
           az network vwan create --name icmelwan --resource-group $resource_group --location eastus --type "Standard"
           
           # Create the policy and the securehub from the protal
-          - name: Installing pwsh module
-          shell: pwsh
-          run: |
-            Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -Verbose
-            Update-Module -Name Az -Scope CurrentUser -Force
-            Get-Module -Name Az
-            
+      - name: Installing pwsh module
+        shell: pwsh
+        run: |
+          Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -Verbose
+          Update-Module -Name Az -Scope CurrentUser -Force
+          Get-Module -Name Az
+          
       - name: Connecting pwsh 
         env: 
           USERNAME: ${{ secrets.AZURE_CLIENT_ID }}
