@@ -44,8 +44,8 @@ jobs:
             New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"
             
             $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group
-            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName Test-FWPolicy-RG -FirewallPolicyName EUS-Policy
-            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName Test-FWPolicy-RG -AzureFirewallPolicyName EUS-Policy
+            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName $resource_group -FirewallPolicyName EUS-Policy
+            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $resource_group -AzureFirewallPolicyName EUS-Policy
             
             $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort * 
             
