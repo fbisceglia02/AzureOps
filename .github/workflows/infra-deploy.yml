@@ -48,3 +48,59 @@ jobs:
           az network vwan create --name icmelwan --resource-group $resource_group --location eastus --type "Standard"
           
           # Create the policy and the securehub from the protal
+          - name: Installing pwsh module
+          shell: pwsh
+          run: |
+            Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -Verbose
+            Update-Module -Name Az -Scope CurrentUser -Force
+            Get-Module -Name Az
+            
+      - name: Connecting pwsh 
+        env: 
+          USERNAME: ${{ secrets.AZURE_CLIENT_ID }}
+          PASSWORD: ${{ secrets.AZ_CLIENT_SECRET }}
+        shell: pwsh
+        run: |
+          $clientId = $env:USERNAME
+          $clientSecret = $env:PASSWORD
+          $securePassword = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force
+          $psCredential = New-Object System.Management.Automation.PSCredential($clientId, $securePassword)
+          Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant ${{ secrets.AZURE_TENANT_ID }} -SubscriptionId 'c550fb2d-3f43-40b7-9e36-f1d47f436e42'
+          Get-AzResourceGroup
+
+      - name: Create Az Policy using pwsh
+        shell: pwsh
+        run: |
+            $resource_group='icmelrg'
+            # AZ Policy with pwsh module
+
+            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"
+            
+            $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group
+            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName $resource_group -FirewallPolicyName EUS-Policy
+            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $resource_group -AzureFirewallPolicyName EUS-Policy
+                          
+            $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort * 
+            
+            $newrulecollectionconfig=New-AzFirewallPolicyFilterRuleCollection -Name myfirstrulecollection -Priority 1000 -Rule $networkrule1 -ActionType Allow
+            
+            $newrulecollection = $networkrulecollectiongroup.Properties.RuleCollection.Add($newrulecollectionconfig)
+            
+            Set-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -Priority "200" -FirewallPolicyObject $firewallpolicy -RuleCollection $networkrulecollectiongroup.Properties.RuleCollection
+    
+      - name: Create Az VHub on the WAN and configure spoke connections
+        shell: pwsh
+        run: |
+            $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location $Location -AddressPrefix "192.168.1.0/24" -Sku "Standard"
+
+            $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
+            $Spoke1 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet1
+            $Spoke2 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icnetappvnet
+            
+            
+            # Connect Virtual Network to Virtual WAN
+            $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True
+            
+            $Spoke1Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke1" -RemoteVirtualNetwork $Spoke1 -EnableInternetSecurityFlag $True
+            
+            $Spoke2Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke2" -RemoteVirtualNetwork $Spoke2 -EnableInternetSecurityFlag $True
