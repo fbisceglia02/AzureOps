@@ -92,6 +92,8 @@ jobs:
         shell: pwsh
         run: |
             $HubName = 'icsechub'
+            $resource_group = 'icmelrg'
+
             $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location $Location -AddressPrefix "192.168.1.0/24" -Sku "Standard"
 
             $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
