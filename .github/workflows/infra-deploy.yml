@@ -15,7 +15,36 @@ jobs:
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
         
-      - name: Run Custom Script
+      - name: Deploy Infrastructure
         shell: bash
         run: |
-          az group deployment list
+          resource_group='icmelrg'
+
+          # -- Resource Group --
+          az group create -n $resource_group --location eastus
+          
+          # -- Virtual Networks -- 
+          
+          az network vnet create -g $resource_group -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'
+          
+          az network vnet create -g $resource_group -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'
+          
+          az network vnet create -g $resource_group -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'
+          
+          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.5.0.0/24'
+          
+          # -- Virtual Machines
+          
+          az vm create -n icmel0 -g $resource_group --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
+          
+          az vm create -n icmel1 -g $resource_group --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
+          
+          az vm create -n icnetapp -g $resource_group --image Ubuntu2204 --vnet-name icnetappvnet --subnet icnetappvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
+          
+          az vm create -n iconprem -g $resource_group --image Ubuntu2204 --vnet-name iconpremvnet --subnet iconpremvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
+          
+          # -- Virtual WAN --
+          
+          az network vwan create --name icmelwan --resource-group $resource_group --location eastus --type "Standard"
+          
+          # Create the policy and the securehub from the protal
