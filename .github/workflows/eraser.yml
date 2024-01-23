@@ -15,7 +15,7 @@ jobs:
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
         
-      - name: Deploy Infrastructure
+      - name: Erase Infrastructure
         shell: bash
         run: |
             az group delete -n icmelrg --yes
