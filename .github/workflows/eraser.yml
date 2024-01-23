@@ -1,0 +1,21 @@
+name: Infrastructure Eraser
+
+on:
+  workflow_dispatch:
+
+jobs:
+  erase-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Azure Custom Login
+        shell: bash
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+        
+      - name: Deploy Infrastructure
+        shell: bash
+        run: |
+            az group delete -n icmelrg
