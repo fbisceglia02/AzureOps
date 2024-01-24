@@ -1,52 +1,33 @@
 name: Infrastructure deployment
-
 on:
   workflow_dispatch:
-
 jobs:
   deploy-infrastructure:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
       - name: Azure Custom Login
         shell: bash
-        run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-        
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
       - name: Deploy Infrastructure
         shell: bash
         run: |
           resource_group='icmelrg'
-
           # -- Resource Group --
-          az group create -n $resource_group --location eastus
-          
-          # -- Virtual Networks -- 
-          
-          az network vnet create -g $resource_group -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'
-          
-          az network vnet create -g $resource_group -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'
-          
-          az network vnet create -g $resource_group -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'
-          
-          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name iconpremvnet_sub --subnet-prefixes '10.5.0.0/24'
-          
-          # -- Virtual Machines
-          
-          az vm create -n icmel0 -g $resource_group --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
-          
-          az vm create -n icmel1 -g $resource_group --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
-          
-          az vm create -n icnetapp -g $resource_group --image Ubuntu2204 --vnet-name icnetappvnet --subnet icnetappvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
-          
-          az vm create -n iconprem -g $resource_group --image Ubuntu2204 --vnet-name iconpremvnet --subnet iconpremvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose
-          
-          # -- Virtual WAN --
-          
-          az network vwan create --name icmelwan --resource-group $resource_group --location eastus --type "Standard"
-          
+          az group create -n $resource_group --location eastus          
+          # -- Virtual Networks --           
+          az network vnet create -g $resource_group -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'          
+          az network vnet create -g $resource_group -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'          
+          az network vnet create -g $resource_group -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'          
+          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name iconpremvnet_sub --subnet-prefixes '10.5.0.0/24'          
+          # -- Virtual Machines         
+          az vm create -n icmel0 -g $resource_group --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          az vm create -n icmel1 -g $resource_group --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose         
+          az vm create -n icnetapp -g $resource_group --image Ubuntu2204 --vnet-name icnetappvnet --subnet icnetappvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          az vm create -n iconprem -g $resource_group --image Ubuntu2204 --vnet-name iconpremvnet --subnet iconpremvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          # -- Virtual WAN --          
+          az network vwan create --name icmelwan --resource-group $resource_group --location eastus --type "Standard"          
           # Create the policy and the securehub from the protal
       - name: Installing pwsh module
         shell: pwsh
@@ -67,43 +48,30 @@ jobs:
           $psCredential = New-Object System.Management.Automation.PSCredential($clientId, $securePassword)
           Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant ${{ secrets.AZURE_TENANT_ID }} -SubscriptionId 'c550fb2d-3f43-40b7-9e36-f1d47f436e42'
           Get-AzResourceGroup
-
       - name: Create Az Policy using pwsh
         shell: pwsh
         run: |
             $resource_group='icmelrg'
             # AZ Policy with pwsh module
-
-            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"
-            
+            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"          
             $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group
             $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName $resource_group -FirewallPolicyName EUS-Policy
-            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $resource_group -AzureFirewallPolicyName EUS-Policy
-                          
-            $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort * 
-            
-            $newrulecollectionconfig=New-AzFirewallPolicyFilterRuleCollection -Name myfirstrulecollection -Priority 1000 -Rule $networkrule1 -ActionType Allow
-            
-            $newrulecollection = $networkrulecollectiongroup.Properties.RuleCollection.Add($newrulecollectionconfig)
-            
-            Set-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -Priority "200" -FirewallPolicyObject $firewallpolicy -RuleCollection $networkrulecollectiongroup.Properties.RuleCollection
-    
+            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $resource_group -AzureFirewallPolicyName EUS-Policy                          
+            $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort *             
+            $newrulecollectionconfig=New-AzFirewallPolicyFilterRuleCollection -Name myfirstrulecollection -Priority 1000 -Rule $networkrule1 -ActionType Allow            
+            $newrulecollection = $networkrulecollectiongroup.Properties.RuleCollection.Add($newrulecollectionconfig)            
+            Set-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -Priority "200" -FirewallPolicyObject $firewallpolicy -RuleCollection $networkrulecollectiongroup.Properties.RuleCollection    
       - name: Create Az VHub on the WAN and configure spoke connections
         shell: pwsh
         run: |
             $HubName = 'icsechub'
             $resource_group = 'icmelrg'
-
-            $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location $Location -AddressPrefix "192.168.1.0/24" -Sku "Standard"
-
+            $VWan = Get-AzVirtualWan -n icmelwan
             $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
             $Spoke1 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet1
             $Spoke2 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icnetappvnet
-            
-            
-            # Connect Virtual Network to Virtual WAN
-            $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True
-            
+            $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location $Location -AddressPrefix "192.168.1.0/24" -Sku "Standard"
+            # Connect Virtual Networks to Virtual WAN
+            $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True            
             $Spoke1Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke1" -RemoteVirtualNetwork $Spoke1 -EnableInternetSecurityFlag $True
-            
             $Spoke2Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke2" -RemoteVirtualNetwork $Spoke2 -EnableInternetSecurityFlag $True
