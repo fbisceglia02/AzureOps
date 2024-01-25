@@ -70,8 +70,13 @@ jobs:
             $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
             $Spoke1 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet1
             $Spoke2 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icnetappvnet
+            $OnPrem = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n iconpremvnet
             $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location 'eastus' -AddressPrefix "192.168.1.0/24" -Sku "Standard"
             # Connect Virtual Networks to Virtual WAN
             $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True            
             $Spoke1Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke1" -RemoteVirtualNetwork $Spoke1 -EnableInternetSecurityFlag $True
             $Spoke2Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke2" -RemoteVirtualNetwork $Spoke2 -EnableInternetSecurityFlag $True
+            # Peering between vnets
+            Add-AzVirtualNetworkPeering -Name "peering-netapp-to-onprem" -VirtualNetwork $Spoke2 -RemoteVirtualNetworkId $OnPrem.Id -AllowForwardedTraffic 
+            Add-AzVirtualNetworkPeering -Name "peering-onprem-to-netapp" -VirtualNetwork $OnPrem -RemoteVirtualNetworkId $Spoke2.Id -AllowForwardedTraffic 
+
