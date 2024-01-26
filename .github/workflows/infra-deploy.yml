@@ -12,7 +12,7 @@ jobs:
         run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
       - name: Deploy resource group
         shell: bash
-        run: az network vwan create --name icmelwan --resource-group icmelrg --location eastus --type "Standard"          
+        run: az group create --name icmelrg --location eastus           
   deploy-virtualhub:
     needs: create-rg
     runs-on: ubuntu-latest
@@ -26,6 +26,7 @@ jobs:
         shell: bash
         run: az network vwan create --name icmelwan --resource-group icmelrg --location eastus --type "Standard"          
   deploy-infrastructure:
+    needs: create-rg
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
