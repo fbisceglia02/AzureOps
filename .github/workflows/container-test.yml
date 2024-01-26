@@ -1,0 +1,20 @@
+name: Container Test
+#comment
+on:
+  workflow_dispatch:
+env:
+  RESOURCE_GROUP: 'icmelrg'
+jobs:
+  deploy-pwsh:
+      runs-on: ubuntu-latest
+      container:
+        image: fexbi/pwsh-az:0.1
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+        - name: Connecting pwsh 
+          env: 
+            USERNAME: ${{ secrets.AZURE_CLIENT_ID }}
+            PASSWORD: ${{ secrets.AZ_CLIENT_SECRET }}
+          shell: pwsh
+          run: Get-InstalledModule 
