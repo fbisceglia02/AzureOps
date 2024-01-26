@@ -34,17 +34,7 @@ jobs:
       image: fexbi/pwsh-az:0.1
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Azure Custom Login
-        shell: bash
-        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}               
-      - name: Installing pwsh module
-        shell: pwsh
-        run: |
-          Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -Verbose
-          Update-Module -Name Az -Scope CurrentUser -Force
-          Get-Module -Name Az
-          
+        uses: actions/checkout
       - name: Connecting pwsh 
         env: 
           USERNAME: ${{ secrets.AZURE_CLIENT_ID }}
