@@ -35,7 +35,7 @@ jobs:
       image: fexbi/pwsh-az:0.1
     steps:
       - name: Checkout Repository
-        uses: actions/checkout
+        uses: actions/checkout@v2
       - name: Connecting pwsh 
         env: 
           USERNAME: ${{ secrets.AZURE_CLIENT_ID }}
