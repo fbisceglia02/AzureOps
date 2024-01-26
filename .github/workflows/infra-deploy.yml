@@ -32,7 +32,7 @@ jobs:
     needs: create-rg
     runs-on: ubuntu-latest
     container:
-      image: fexbi/pwsh-az:0.1
+      image: fexbi/pwsh-az:0.1.1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
