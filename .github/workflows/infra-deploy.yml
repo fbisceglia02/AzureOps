@@ -1,6 +1,8 @@
 name: Infrastructure deployment
 on:
   workflow_dispatch:
+env:
+  RESOURCE_GROUP: 'icmelrg'
 jobs:
   create-rg:
     runs-on: ubuntu-latest
@@ -38,15 +40,15 @@ jobs:
         shell: bash
         run: |        
           # -- Virtual Networks --           
-          az network vnet create -g $resource_group -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'          
-          az network vnet create -g $resource_group -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'          
-          az network vnet create -g $resource_group -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'          
-          az network vnet create -g $resource_group -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name iconpremvnet_sub --subnet-prefixes '10.5.0.0/24'          
+          az network vnet create -g $RESOURCE_GROUP -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'          
+          az network vnet create -g $RESOURCE_GROUP -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'          
+          az network vnet create -g $RESOURCE_GROUP -n icnetappvnet --address-prefix 10.4.0.0/16 --subnet-name icnetappvnet_sub --subnet-prefixes '10.4.0.0/24'          
+          az network vnet create -g $RESOURCE_GROUP -n iconpremvnet --address-prefix 10.5.0.0/16 --subnet-name iconpremvnet_sub --subnet-prefixes '10.5.0.0/24'          
           # -- Virtual Machines         
-          az vm create -n icmel0 -g $resource_group --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
-          az vm create -n icmel1 -g $resource_group --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose         
-          az vm create -n icnetapp -g $resource_group --image Ubuntu2204 --vnet-name icnetappvnet --subnet icnetappvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
-          az vm create -n iconprem -g $resource_group --image Ubuntu2204 --vnet-name iconpremvnet --subnet iconpremvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          az vm create -n icmel0 -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          az vm create -n icmel1 -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose         
+          az vm create -n icnetapp -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icnetappvnet --subnet icnetappvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+          az vm create -n iconprem -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name iconpremvnet --subnet iconpremvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
           # -- Virtual WAN --          
           # Create the policy and the securehub from the protal
       - name: Installing pwsh module
@@ -71,12 +73,12 @@ jobs:
       - name: Create Az Policy using pwsh
         shell: pwsh
         run: |
-            $resource_group='icmelrg'
+            $RESOURCE_GROUP='icmelrg'
             # AZ Policy with pwsh module
-            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group -Location "EAST US"          
-            $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $resource_group
-            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName $resource_group -FirewallPolicyName EUS-Policy
-            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $resource_group -AzureFirewallPolicyName EUS-Policy                          
+            New-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $RESOURCE_GROUP -Location "EAST US"          
+            $firewallpolicy = Get-AzFirewallPolicy -Name EUS-Policy -ResourceGroupName $RESOURCE_GROUP
+            $newnetworkrulecollectiongroup = New-AzFirewallPolicyRuleCollectionGroup  -Name "NetworkRuleCollectionGroup" -Priority 200 -ResourceGroupName $RESOURCE_GROUP -FirewallPolicyName EUS-Policy
+            $networkrulecollectiongroup = Get-AzFirewallPolicyRuleCollectionGroup -Name "NetworkRuleCollectionGroup" -ResourceGroupName $RESOURCE_GROUP -AzureFirewallPolicyName EUS-Policy                          
             $networkrule1= New-AzFirewallPolicyNetworkRule -Name AllowRule -Description allowrule -SourceAddress * -Protocol Any -DestinationAddress * -DestinationPort *             
             $newrulecollectionconfig=New-AzFirewallPolicyFilterRuleCollection -Name myfirstrulecollection -Priority 1000 -Rule $networkrule1 -ActionType Allow            
             $newrulecollection = $networkrulecollectiongroup.Properties.RuleCollection.Add($newrulecollectionconfig)            
@@ -85,17 +87,17 @@ jobs:
         shell: pwsh
         run: |
             $HubName = 'icsechub'
-            $resource_group = 'icmelrg'
+            $RESOURCE_GROUP = 'icmelrg'
             $VWan = Get-AzVirtualWan -n icmelwan
-            $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet0 
-            $Spoke1 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icvnet1
-            $Spoke2 = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n icnetappvnet
-            $OnPrem = Get-AzVirtualNetwork -ResourceGroupName $resource_group -n iconpremvnet
-            $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $resource_group -VirtualWan $Vwan -Location 'eastus' -AddressPrefix "192.168.1.0/24" -Sku "Standard"
+            $Spoke0 = Get-AzVirtualNetwork -ResourceGroupName $RESOURCE_GROUP -n icvnet0 
+            $Spoke1 = Get-AzVirtualNetwork -ResourceGroupName $RESOURCE_GROUP -n icvnet1
+            $Spoke2 = Get-AzVirtualNetwork -ResourceGroupName $RESOURCE_GROUP -n icnetappvnet
+            $OnPrem = Get-AzVirtualNetwork -ResourceGroupName $RESOURCE_GROUP -n iconpremvnet
+            $Hub = New-AzVirtualHub -Name $HubName -ResourceGroupName $RESOURCE_GROUP -VirtualWan $Vwan -Location 'eastus' -AddressPrefix "192.168.1.0/24" -Sku "Standard"
             # Connect Virtual Networks to Virtual WAN
-            $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True            
-            $Spoke1Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke1" -RemoteVirtualNetwork $Spoke1 -EnableInternetSecurityFlag $True
-            $Spoke2Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $resource_group -ParentResourceName  $HubName -Name "spoke2" -RemoteVirtualNetwork $Spoke2 -EnableInternetSecurityFlag $True
+            $Spoke0Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $RESOURCE_GROUP -ParentResourceName  $HubName -Name "spoke0" -RemoteVirtualNetwork $Spoke0 -EnableInternetSecurityFlag $True            
+            $Spoke1Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $RESOURCE_GROUP -ParentResourceName  $HubName -Name "spoke1" -RemoteVirtualNetwork $Spoke1 -EnableInternetSecurityFlag $True
+            $Spoke2Connection = New-AzVirtualHubVnetConnection -ResourceGroupName $RESOURCE_GROUP -ParentResourceName  $HubName -Name "spoke2" -RemoteVirtualNetwork $Spoke2 -EnableInternetSecurityFlag $True
             # Peering between vnets
             Add-AzVirtualNetworkPeering -Name "peering-netapp-to-onprem" -VirtualNetwork $Spoke2 -RemoteVirtualNetworkId $OnPrem.Id -AllowForwardedTraffic 
             Add-AzVirtualNetworkPeering -Name "peering-onprem-to-netapp" -VirtualNetwork $OnPrem -RemoteVirtualNetworkId $Spoke2.Id -AllowForwardedTraffic 
