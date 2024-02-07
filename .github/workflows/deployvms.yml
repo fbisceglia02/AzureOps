@@ -1,0 +1,35 @@
+name: Deploy two simple vms in a resource group
+#comment
+on:
+  workflow_dispatch:
+env:
+  RESOURCE_GROUP: 'icmelrg'
+jobs:
+  create-rg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Azure Custom Login
+        shell: bash
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
+      - name: Deploy resource group
+        shell: bash
+        run: az group create --name icmelrg --location eastus           
+  deploy-vnets-vms:
+    needs: create-rg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Azure Custom Login
+      shell: bash
+      run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}    
+    - name: Deploy Infrastructure
+      shell: bash
+      run: |        
+        # -- Virtual Networks --           
+        az network vnet create -g $RESOURCE_GROUP -n icvnet0 --address-prefix 10.0.0.0/16 --subnet-name icvnet0_sub --subnet-prefixes '10.0.0.0/24'          
+        az network vnet create -g $RESOURCE_GROUP -n icvnet1 --address-prefix 10.1.0.0/16 --subnet-name icvnet1_sub --subnet-prefixes '10.1.0.0/24'              
+        az vm create -n icmel0 -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvnet0 --subnet icvnet0_sub --admin-username azureuser --generate-ssh-keys --output json --verbose          
+        az vm create -n icmel1 -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvnet1 --subnet icvnet1_sub --admin-username azureuser --generate-ssh-keys --output json --verbose         
