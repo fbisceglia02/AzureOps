@@ -5,7 +5,7 @@ on:
     inputs:
       resource-group-name:
         type: string
-        required: true
+        required: false
         description: 'Name of the resource group to erase, enter "clear-all" to clear them all'
 
 jobs:

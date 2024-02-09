@@ -5,11 +5,11 @@ on:
     inputs:
         resource-group-name:
           type: string
-          required: true
+          required: false
           description: 'Name of the resource group where aks will be created'
         aks-name:
           type: string
-          required: true
+          required: false
           description: 'Name of the aks will be created'
 
 jobs:
