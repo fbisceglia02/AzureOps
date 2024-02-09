@@ -26,7 +26,16 @@ jobs:
             resourceGroup="${{ github.event.inputs.resource-group-name }}"
             if [ "$resourceGroup" = "clear-all" ]; then
               echo "Clearing all..."
+              
+              for name in $(az group list | jq -r '.[].name'); do
+                if [[ $name != "--help" && $name != "NetworkWatcherRG" ]]; then
+                  az group delete -n $name --yes
+                fi
+              done
+              echo "Cleared all Resource Groups."
+            
             else
               az group delete -n $resourceGroup --yes
+              echo "Cleared Resource Group $resourceGroup"
             fi
             
