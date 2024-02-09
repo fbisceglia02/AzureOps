@@ -2,15 +2,33 @@ name: AKS deployment
 #comment
 on:
   workflow_dispatch:
-  
+    inputs:
+        resource-group-name:
+          type: string
+          required: true
+          description: 'Name of the resource group where aks will be created'
+        aks-name:
+          type: string
+          required: true
+          description: 'Name of the aks will be created'
+
 jobs:
-  connect-and-restart:
+  create-rg:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
       - name: Azure Custom Login
         shell: bash
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Setup Env
+        shell: bash
         run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          echo "RESOURCE_GROUP=${{ github.event.inputs.resource-group-name || 'ic-aks-rg' }}" >> $GITHUB_ENV
+          echo "AKS_NAME=${{ github.event.inputs.aks-name || 'ic-aks' }}" >> $GITHUB_ENV
+      - name: Deploy resource group
+        shell: bash
+        run: |
+          az group create --name $RESOURCE_GROUP --location eastus  
+          az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus
+          az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing         
