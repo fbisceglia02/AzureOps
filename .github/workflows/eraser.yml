@@ -2,6 +2,11 @@ name: Infrastructure Eraser
 
 on:
   workflow_dispatch:
+    inputs:
+      resource-group-name:
+        type: string
+        required: true
+        description: 'Name of the resource group to erase, enter "clear-all" to clear them all'
 
 jobs:
   erase-infrastructure:
@@ -18,4 +23,10 @@ jobs:
       - name: Erase Infrastructure
         shell: bash
         run: |
-            az group delete -n icmelrg --yes
+            resourceGroup="${{ github.event.inputs.resource-group-name }}"
+            if [ "$resourceGroup" = "clear-all" ]; then
+              echo "Clearing all..."
+            else
+              az group delete -n $resourceGroup --yes
+            fi
+            
