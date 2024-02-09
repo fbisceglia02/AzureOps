@@ -23,19 +23,31 @@ jobs:
       - name: Erase Infrastructure
         shell: bash
         run: |
-            resourceGroup="${{ github.event.inputs.resource-group-name }}"
+          deleteResourceGroups() {
+            local resourceGroup=$1
             if [ "$resourceGroup" = "clear-all" ] || [ -z "$resourceGroup" ]; then
-              echo "Clearing all..."
+              echo "Attempting to clear all resource groups..."
+              local resourceGroupsToDelete=$(az group list | jq -r '.[].name | select(. != "--help" and . != "NetworkWatcherRG")')
               
-              for name in $(az group list | jq -r '.[].name'); do
-                if [[ $name != "--help" && $name != "NetworkWatcherRG" ]]; then
-                  az group delete -n $name --yes
+              for name in $resourceGroupsToDelete; do
+                if ! az group delete -n "$name" --yes; then
+                  echo "Failed to delete Resource Group $name, retrying..."
+                  deleteResourceGroups "$resourceGroup"
+                  break
+                else
+                  echo "Deleted Resource Group $name"
                 fi
               done
-              echo "Cleared all Resource Groups."
-            
             else
-              az group delete -n $resourceGroup --yes
-              echo "Cleared Resource Group $resourceGroup"
+              if ! az group delete -n "$resourceGroup" --yes; then
+                echo "Failed to delete Resource Group $resourceGroup, retrying..."
+                deleteResourceGroups "$resourceGroup"
+              else
+                echo "Deleted Resource Group $resourceGroup"
+              fi
             fi
-            
+          }
+
+          resourceGroup="${{ github.event.inputs.resource-group-name }}"
+          deleteResourceGroups "$resourceGroup"
+
