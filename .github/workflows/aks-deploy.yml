@@ -1,5 +1,5 @@
 
-    name: Infrastructure deployment
+    name: AKS deployment
 #comment
 on:
   workflow_dispatch:
