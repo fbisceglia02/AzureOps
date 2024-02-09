@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
             resourceGroup="${{ github.event.inputs.resource-group-name }}"
-            if [ "$resourceGroup" = "clear-all" ]; then
+            if [ "$resourceGroup" = "clear-all" ] || [ -z "$resourceGroup" ]; then
               echo "Clearing all..."
               
               for name in $(az group list | jq -r '.[].name'); do
