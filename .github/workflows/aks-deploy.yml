@@ -30,5 +30,5 @@ jobs:
         shell: bash
         run: |
           az group create --name $RESOURCE_GROUP --location eastus  
-          az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus
+          az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
           az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing         
