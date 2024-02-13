@@ -2,6 +2,15 @@ name: Deploy a VM on a VNET on Azure
 
 on:
   workflow_dispatch:
+    inputs:
+      connection:
+        description: 'test'
+        required: true
+        type: choice
+        options:
+        - 'Yup'
+        - 'Nope'
+  
 env:
   RESOURCE_GROUP: 'vm-vnet-ez-rg'
 
@@ -34,5 +43,7 @@ jobs:
                 az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'       
                 # -- Virtual Machine --       
                 az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
-
+          - name: Conditional test
+            if: ${{ github.event.inputs.connection == 'Yup' }}
+            run: "yup"
     
