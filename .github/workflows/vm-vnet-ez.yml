@@ -1,0 +1,38 @@
+name: VM and Vnet easy deployer
+
+on:
+  workflow_dispatch:
+env:
+  RESOURCE_GROUP: 'vm-vnet-ez-rg'
+
+jobs:
+    create-rg:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+        - name: Azure Custom Login
+          shell: bash
+          run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
+        - name: Deploy resource group
+          shell: bash
+          run: az group create --name icmelrg --location eastus      
+
+    deploy-infrastructure:
+        needs: create-rg
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v2
+          - name: Azure Custom Login
+            shell: bash
+            run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}    
+          - name: Deploy Infrastructure
+            shell: bash
+            run: | 
+                # -- Virtual Network --           
+                az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --subnet-prefixes '10.0.0.0/24'       
+                # -- Virtual Machine --       
+                az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --admin-username azureuser --generate-ssh-keys --output json --verbose  
+
+    
