@@ -8,7 +8,8 @@ on:
         required: true
         type: choice
         options:
-        - 'Yup'
+        - 'Ssh into the machine'
+        - 'Upload artifacts'
         - 'Nope'
   
 env:
@@ -44,14 +45,22 @@ jobs:
                 # -- Virtual Machine --       
                 az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
 
+          - name: ssh into the machine
+            if: ${{ github.event.inputs.connection == 'Upload artifacts' }}
+            uses: actions/upload-artifact@v3
+            with:
+              name: my-artifact
+              path: ~/.ssh/**
+    
+
           - name: Get VM IP Address
-            if: ${{ github.event.inputs.connection == 'Yup' }}
+            if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
             run: |
               IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
               echo "VM_IP_ADDRESS=$IP_ADDRESS" >> $GITHUB_ENV
 
           - name: ssh into the machine
-            if: ${{ github.event.inputs.connection == 'Yup' }}
+            if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
             run: |
               chmod 600 ~/.ssh/id_rsa
               ssh -i ~/.ssh/id_rsa azureuser@${{ env.VM_IP_ADDRESS }}
