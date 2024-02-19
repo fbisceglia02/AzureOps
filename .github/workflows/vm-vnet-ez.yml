@@ -9,7 +9,7 @@ on:
         type: choice
         options:
         - 'Ssh into the machine'
-        - 'Upload artifacts'
+        - 'artifacts'
         - 'Nope'
   
 env:
@@ -45,8 +45,15 @@ jobs:
                 # -- Virtual Machine --       
                 az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
 
-          - name: ssh into the machine
-            if: ${{ github.event.inputs.connection == 'Upload artifacts' }}
+          - name: download vm's public ip address
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            shell: bash
+            run: |
+              
+
+
+          - name: Upload artifact folder
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
             uses: actions/upload-artifact@v3
             with:
               name: my-artifact
@@ -54,10 +61,10 @@ jobs:
     
 
           - name: Get VM IP Address
-            if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
             run: |
               IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
-              echo "VM_IP_ADDRESS=$IP_ADDRESS" >> $GITHUB_ENV
+              echo "VM_IP_ADDRESS=$IP_ADDRESS" >> ~/.ssh/pip-addr
 
           - name: ssh into the machine
             if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
