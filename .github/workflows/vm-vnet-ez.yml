@@ -2,6 +2,16 @@ name: Deploy a VM on a VNET on Azure
 
 on:
   workflow_dispatch:
+    inputs:
+      connection:
+        description: 'test'
+        required: true
+        type: choice
+        options:
+        - 'Ssh into the machine'
+        - 'artifacts'
+        - 'Nope'
+  
 env:
   RESOURCE_GROUP: 'vm-vnet-ez-rg'
 
@@ -35,4 +45,28 @@ jobs:
                 # -- Virtual Machine --       
                 az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
 
+              
+          - name: Get VM IP Address and put it into artifacts folder
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            run: |
+              IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+              echo $IP_ADDRESS
+              echo $IP_ADDRESS > ~/.ssh/pip-addr
+
+
+          - name: Upload artifact folder
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            uses: actions/upload-artifact@v3
+            with:
+              name: key-pip
+              path: ~/.ssh/**
     
+
+
+          - name: ssh into the machine
+            if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
+            run: |
+              chmod 600 ~/.ssh/id_rsa
+              ssh -i ~/.ssh/id_rsa azureuser@${{ env.VM_IP_ADDRESS }}
+              echo "hello from the machine"
+
