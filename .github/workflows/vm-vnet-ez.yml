@@ -45,10 +45,6 @@ jobs:
                 # -- Virtual Machine --       
                 az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
 
-          - name: download vm's public ip address
-            if: ${{ github.event.inputs.connection == 'artifacts' }}
-            shell: bash
-            run: |
               
           - name: Get VM IP Address and put it into artifacts folder
             if: ${{ github.event.inputs.connection == 'artifacts' }}
@@ -62,7 +58,7 @@ jobs:
             if: ${{ github.event.inputs.connection == 'artifacts' }}
             uses: actions/upload-artifact@v3
             with:
-              name: my-artifact
+              name: key-pip
               path: ~/.ssh/**
     
 
