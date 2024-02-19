@@ -8,7 +8,7 @@ on:
         required: false
         type: choice
         options:
-        - 'ez'
+        - 'vm-vnet-ez'
       resource-group-name:
         type: string
         required: false
@@ -52,8 +52,15 @@ jobs:
                 echo "Deleted Resource Group $resourceGroup"
               fi
             fi
-          }
-
+          } 
           resourceGroup="${{ github.event.inputs.resource-group-name }}"
           deleteResourceGroups "$resourceGroup"
 
+      - name: Dispatch vm-vnet-ez workflow
+        if: ${{ github.event.inputs.trigger == 'vm-vnet-ez' }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.PAT }}" \
+            https://api.github.com/repos/fbisceglia02/AzureOps/dispatches \
+            -d '{"event_type": "dispatch-vm-vnet-ez", "client_payload": {"connection": "artifacts"}}'
