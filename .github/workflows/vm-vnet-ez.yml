@@ -2,7 +2,7 @@ name: Deploy a VM on a VNET on Azure
 
 on:
   repository_dispatch:
-    types: [dispatch-vm-vnet-ez]
+    types: ["dispatch-vm-vnet-ez"]
   workflow_dispatch:
     inputs:
       connection:
