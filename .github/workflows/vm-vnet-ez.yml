@@ -50,6 +50,11 @@ jobs:
             shell: bash
             run: |
               
+          - name: Get VM IP Address and put it into artifacts folder
+            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            run: |
+              IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+              echo "VM_IP_ADDRESS=$IP_ADDRESS" >> ~/.ssh/pip-addr
 
 
           - name: Upload artifact folder
@@ -60,11 +65,6 @@ jobs:
               path: ~/.ssh/**
     
 
-          - name: Get VM IP Address
-            if: ${{ github.event.inputs.connection == 'artifacts' }}
-            run: |
-              IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
-              echo "VM_IP_ADDRESS=$IP_ADDRESS" >> ~/.ssh/pip-addr
 
           - name: ssh into the machine
             if: ${{ github.event.inputs.connection == 'Ssh into the machine' }}
