@@ -1,6 +1,8 @@
 name: Deploy a VM on a VNET on Azure
 
 on:
+  repository_dispatch:
+    types: ["dispatch-vm-vnet-ez"]
   workflow_dispatch:
     inputs:
       connection:
@@ -19,6 +21,10 @@ jobs:
     create-rg:
       runs-on: ubuntu-latest
       steps:
+        - name: Process Connection Type
+          run: |
+            echo "Connection type received: ${{ github.event.client_payload.connection }}"
+            exit 0
         - name: Checkout Repository
           uses: actions/checkout@v2
         - name: Azure Custom Login

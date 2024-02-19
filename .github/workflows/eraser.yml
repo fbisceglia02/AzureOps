@@ -3,6 +3,12 @@ name: Infrastructure Eraser
 on:
   workflow_dispatch:
     inputs:
+      trigger:
+        description: 'trigger other workflows after it'
+        required: false
+        type: choice
+        options:
+        - 'vm-vnet-ez'
       resource-group-name:
         type: string
         required: false
@@ -46,8 +52,14 @@ jobs:
                 echo "Deleted Resource Group $resourceGroup"
               fi
             fi
-          }
-
+          } 
           resourceGroup="${{ github.event.inputs.resource-group-name }}"
           deleteResourceGroups "$resourceGroup"
 
+      - name: Dispatch vm-vnet-ez workflow
+        if: ${{ github.event.inputs.trigger == 'vm-vnet-ez' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT }}
+          repository: fbisceglia02/AzureOps
+          event-type: "dispatch-vm-vnet-ez"
