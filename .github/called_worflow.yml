@@ -1,0 +1,15 @@
+# Called Workflow - .github/workflows/called_workflow.yml
+name: Called Workflow
+
+on:
+  repository_dispatch:
+    types: [trigger-called-workflow]
+
+jobs:
+  respond_to_dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run a script or command
+        run: echo "Responding to repository dispatch event." 

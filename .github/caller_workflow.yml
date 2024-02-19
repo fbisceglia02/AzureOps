@@ -1,0 +1,21 @@
+# Caller Workflow - .github/workflows/caller_workflow.yml
+name: Caller Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      event_type:
+        description: 'A custom event type for the repository dispatch.'
+        required: true
+        default: 'trigger-called-workflow'
+
+jobs:
+  call_repository_dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT }}
+          repository: fbisceglia02/AzureOps
+          event-type: ${{ github.event.inputs.event_type }}
