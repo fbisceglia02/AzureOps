@@ -3,6 +3,12 @@ name: Infrastructure Eraser
 on:
   workflow_dispatch:
     inputs:
+      trigger:
+        description: 'trigger other workflows after it'
+        required: false
+        type: choice
+        options:
+        - 'ez'
       resource-group-name:
         type: string
         required: false
