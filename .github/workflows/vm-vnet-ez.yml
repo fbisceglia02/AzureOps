@@ -57,7 +57,7 @@ jobs:
           - name: Get VM IP Address and put it into artifacts folder
             if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
             run: |
-              run: echo ${{ env.IP_ADDRESS }} > ~/.ssh/pip-addr
+              echo ${{ env.IP_ADDRESS }} > ~/.ssh/pip-addr
 
 
           - name: Upload artifact folder
