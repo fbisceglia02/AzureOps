@@ -13,3 +13,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Run a script or command
         run: echo "Responding to repository dispatch event." 
+      - name: Conditional Step
+        if: ${{ github.event.client_payload.condition == 'test' }}
+        run: |
+          echo "Payload Content: ${{ github.event.client_payload }}"
