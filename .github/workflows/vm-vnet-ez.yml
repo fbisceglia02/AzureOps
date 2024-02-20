@@ -49,15 +49,15 @@ jobs:
                 # -- Virtual Network --           
                 az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'       
                 # -- Virtual Machine --       
-                az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
+                echo "IP_ADDRESS=$(az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose | jq -r '.publicIpAddress')" >> $GITHUB_ENV
+
+
 
               
           - name: Get VM IP Address and put it into artifacts folder
             if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
             run: |
-              IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
-              echo $IP_ADDRESS
-              echo $IP_ADDRESS > ~/.ssh/pip-addr
+              run: echo ${{ env.IP_ADDRESS }} > ~/.ssh/pip-addr
 
 
           - name: Upload artifact folder
