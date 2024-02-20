@@ -9,6 +9,7 @@ on:
         type: choice
         options:
         - 'vm-vnet-ez'
+        - 'two-vm-vnet'
       resource-group-name:
         type: string
         required: false
@@ -63,6 +64,15 @@ jobs:
           token: ${{ secrets.PAT }}
           repository: fbisceglia02/AzureOps
           event-type: "dispatch-vm-vnet-ez"
+          client-payload: '{"connection": "artifacts"}'
+
+      - name: Dispatch two-vm-vnet workflow
+        if: ${{ github.event.inputs.trigger == 'two-vm-vnet' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT }}
+          repository: fbisceglia02/AzureOps
+          event-type: "dispatch-two-vm-vnet"
           client-payload: '{"connection": "artifacts"}'
 
       - name: Send Completion message

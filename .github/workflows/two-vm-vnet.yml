@@ -1,0 +1,89 @@
+name: Deploy two VMs on the same subnet of a VNET on Azure
+
+on:
+  repository_dispatch:
+    types: ["dispatch-two-vm-vnet"]
+  workflow_dispatch:
+    inputs:
+      connection:
+        description: 'test'
+        required: true
+        type: choice
+        options:
+        - 'ssh'
+        - 'artifacts'
+        - 'none'
+  
+env:
+  RESOURCE_GROUP: 'vm-vnet-ez-rg'
+
+jobs:
+    create-rg:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Process Connection Type
+          run: |
+            echo "Connection type received: ${{ github.event.client_payload.connection }}"
+            exit 0
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+        - name: Azure Custom Login
+          shell: bash
+          run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
+        - name: Deploy resource group
+          shell: bash
+          run: az group create --name $RESOURCE_GROUP --location eastus      
+
+    deploy-infrastructure:
+        needs: create-rg
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v2
+          - name: Azure Custom Login
+            shell: bash
+            run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}    
+          - name: Deploy Infrastructure
+            shell: bash
+            run: | 
+                # -- Virtual Network --           
+                az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'       
+                # -- Virtual Machines --       
+                az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
+                az vm create -n icezvm0 -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose  
+
+              
+          - name: Get VMs IP Address and put it into artifacts folder
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            run: |
+              IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+              IP_ADDRESS_0=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm0 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+              echo $IP_ADDRESS > ~/.ssh/pip-addr
+              echo $IP_ADDRESS_0 > ~/.ssh/pip-addr-0
+
+
+          - name: Upload artifact folder
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            uses: actions/upload-artifact@v3
+            with:
+              name: key-pip
+              path: ~/.ssh/**
+
+          - name: Send Completion message
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            run: |
+              curl -s \
+                --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
+                --form-string "user=${{ secrets.PUSHOVER_API_KEY }}" \
+                --form-string "message=TWO VMs on a single SUBNET of a VNET deployed" \
+                https://api.pushover.net/1/messages.json
+
+# ----- input: ssh -----
+
+          - name: ssh into the machine
+            if: ${{ github.event.client_payload.connection == 'ssh' || github.event.inputs.connection == 'ssh' }}
+            run: |
+              chmod 600 ~/.ssh/id_rsa
+              ssh -i ~/.ssh/id_rsa azureuser@${{ env.VM_IP_ADDRESS }}
+              echo "hello from the machine"
+
