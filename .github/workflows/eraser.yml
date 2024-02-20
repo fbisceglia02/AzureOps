@@ -64,3 +64,11 @@ jobs:
           repository: fbisceglia02/AzureOps
           event-type: "dispatch-vm-vnet-ez"
           client-payload: '{"connection": "artifacts"}'
+
+      - name: Send Completion message
+        run: |
+          curl -s \
+            --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
+            --form-string "user=${{ secrets.PUSHOVER_API_KEY }}" \
+            --form-string "message=Azure infrastructure erased" \
+            https://api.pushover.net/1/messages.json
