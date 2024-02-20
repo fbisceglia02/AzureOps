@@ -19,5 +19,5 @@ jobs:
           token: ${{ secrets.PAT }}
           repository: fbisceglia02/AzureOps
           event-type: ${{ github.event.inputs.event_type }}
-          client-payload: '{"connection": "approved"}'
+          client-payload: '{"connection": "rejected"}'
 
