@@ -3,7 +3,7 @@ name: Called Workflow
 
 on:
   repository_dispatch:
-    types: [trigger-called-workflow]
+    types: [trigger-called-workflow, test]
 
 jobs:
   respond_to_dispatch:
