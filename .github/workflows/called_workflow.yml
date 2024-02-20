@@ -14,6 +14,10 @@ jobs:
       - name: Run a script or command
         run: echo "Responding to repository dispatch event." 
       - name: Conditional Step
-        # if: ${{ github.event.client_payload.condition == 'test' }}
+        if: ${{ github.event.client_payload.connection == 'approved' }}
+        run: |
+          echo "Payload Content: ${{ github.event.client_payload.connection }}"
+      - name: Conditional Step (negative)
+        if: ${{ github.event.client_payload.connection == 'rejected' }}
         run: |
           echo "Payload Content: ${{ github.event.client_payload.connection }}"
