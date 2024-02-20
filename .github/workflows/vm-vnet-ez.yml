@@ -72,7 +72,7 @@ jobs:
             run: |
               curl -s \
                 --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
-                --form-string "user=${{ secrets.API_KEY }}" \
+                --form-string "user=${{ secrets.PUSHOVER_API_KEY }}" \
                 --form-string "message=VM and VNET successfully deleted and re-deployed!" \
                 https://api.pushover.net/1/messages.json
 
