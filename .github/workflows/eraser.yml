@@ -63,4 +63,4 @@ jobs:
           token: ${{ secrets.PAT }}
           repository: fbisceglia02/AzureOps
           event-type: "dispatch-vm-vnet-ez"
-          
+          client-payload: '{"connection": "artifacts"}'

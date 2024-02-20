@@ -53,7 +53,7 @@ jobs:
 
               
           - name: Get VM IP Address and put it into artifacts folder
-            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
             run: |
               IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP -n icezvm --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
               echo $IP_ADDRESS
@@ -61,14 +61,14 @@ jobs:
 
 
           - name: Upload artifact folder
-            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
             uses: actions/upload-artifact@v3
             with:
               name: key-pip
               path: ~/.ssh/**
 
           - name: Send Completion message
-            if: ${{ github.event.inputs.connection == 'artifacts' }}
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
             run: |
               curl -s \
                 --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
@@ -79,7 +79,7 @@ jobs:
 # ----- input: ssh -----
 
           - name: ssh into the machine
-            if: ${{ github.event.inputs.connection == 'ssh' }}
+            if: ${{ github.event.client_payload.connection == 'ssh' || github.event.inputs.connection == 'ssh' }}
             run: |
               chmod 600 ~/.ssh/id_rsa
               ssh -i ~/.ssh/id_rsa azureuser@${{ env.VM_IP_ADDRESS }}
