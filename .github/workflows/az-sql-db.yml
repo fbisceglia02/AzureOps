@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       user-server-name:
-        description: 'Resource group name to deploy az sql srv'
+        description: 'User-Server-Name'
         required: true
         type: string
 
