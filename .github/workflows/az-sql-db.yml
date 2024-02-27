@@ -1,0 +1,78 @@
+name: Deploy a VM on a VNET on Azure
+
+on:
+#   repository_dispatch:
+    # types: ["dispatch-vm-vnet-ez"]
+  workflow_dispatch:
+    inputs:
+      resource-group-name:
+        description: 'Resource group name to deploy az sql srv'
+        required: true
+        type: string
+      user-server-name:
+        description: 'Resource group name to deploy az sql srv'
+        required: true
+        type: string
+
+env:
+    RESOURCE_GROUP: "${{ github.event.inputs.resource-group-name }}"
+    USER_SRV_NAME: "${{ github.event.inputs.user-server-name }}"
+      
+
+jobs:
+    create-all:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Process Connection Type
+            run: |
+              echo "Connection type received: ${{ github.event.client_payload.connection }}"
+              exit 0
+          - name: Checkout Repository
+            uses: actions/checkout@v2
+          - name: Azure Custom Login
+            shell: bash
+            run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
+          - name: Deploy resource group
+            shell: bash
+            run: |
+              if az group show --name $RESOURCE_GROUP &> /dev/null; then
+                echo "Resource group $RESOURCE_GROUP already exists."
+                exit 1
+              else
+                az group create --name $RESOURCE_GROUP --location eastus
+              fi
+          - name: Create Azure SQL Server with db 
+            shell: bash
+            run: |
+              az sql server create \
+                --name $USER_SRV_NAME \
+                --resource-group $RESOURCE_GROUP \
+                --location eastus \
+                --admin-user $USER_SRV_NAME \
+                --admin-password ${{ secrets.DB_PASS }} \
+                --enable-public-network true
+              
+              az sql db create \
+                --resource-group $RESOURCE_GROUP \
+                --server $USER_SRV_NAME \
+                --name SampleDB \
+                --service-objective GP_Gen5_2 \
+                --edition GeneralPurpose \
+                --zone-redundant false 
+              
+              az sql server firewall-rule create \
+                --resource-group $RESOURCE_GROUP \
+                --server $USER_SRV_NAME \
+                --name AllowAzureServices \
+                --start-ip-address 0.0.0.0 \
+                --end-ip-address 0.0.0.0
+          - name: Send Completion message
+            run: |
+              curl -s \
+                --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
+                --form-string "user=${{ secrets.PUSHOVER_API_KEY }}" \
+                --form-string "message=Azure SQL Server and DB deployed" \
+                https://api.pushover.net/1/messages.json
+              
+          
+          
