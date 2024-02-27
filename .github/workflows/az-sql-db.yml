@@ -1,4 +1,4 @@
-name: Deploy a VM on a VNET on Azure
+name: Deploy Azure SQL srv and DB on it
 
 on:
 #   repository_dispatch:
