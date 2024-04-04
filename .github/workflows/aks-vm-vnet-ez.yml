@@ -1,0 +1,106 @@
+name: Deploy an AKS and a VM on a VNET on Azure
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource-group-name:
+        type: string
+        required: false
+        description: 'Name of the resource group where resources will be created'
+      aks-name:
+        type: string
+        required: false
+        description: 'Name of the aks will be created'  
+      connection:
+        description: 'test'
+        required: true
+        type: choice
+        options:
+        - 'ssh'
+        - 'artifacts'
+        - 'none'
+  
+env:
+  RESOURCE_GROUP: ${{ github.event.inputs.resource-group-name || 'aks-vm-vnet-ez-rg' }}
+  AKS_NAME: ${{ github.event.inputs.aks-name || 'ic-aks' }}
+
+jobs:
+    create-rg:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Process Connection Type
+          run: |
+            echo "Connection type received: ${{ github.event.client_payload.connection }}"
+            exit 0
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+        - name: Azure Custom Login
+          shell: bash
+          run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
+        - name: Deploy resource group
+          shell: bash
+          run: az group create --name $RESOURCE_GROUP --location eastus      
+
+
+    deploy-aks:
+        needs: create-rg
+        runs-on: ubuntu-latest
+        steps:
+        - name: Deploy Azure Kubernetes Services 
+          shell: bash
+          run: |
+                az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
+                az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing 
+
+    deploy-infrastructure:
+        needs: create-rg
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v2
+          - name: Azure Custom Login
+            shell: bash
+            run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}    
+          - name: Deploy Infrastructure
+            shell: bash
+            run: | 
+                # -- Virtual Network --           
+                az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'       
+                # -- Virtual Machine --       
+                echo "IP_ADDRESS=$(az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose | jq -r '.publicIpAddress')" >> $GITHUB_ENV
+
+
+   
+
+              
+          - name: Get VM IP Address and put it into artifacts folder
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            run: |
+              echo ${{ env.IP_ADDRESS }} > ~/.ssh/pip-addr
+
+
+          - name: Upload artifact folder
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            uses: actions/upload-artifact@v3
+            with:
+              name: key-pip
+              path: ~/.ssh/**
+
+          - name: Send Completion message
+            if: ${{ github.event.client_payload.connection == 'artifacts' || github.event.inputs.connection == 'artifacts' }}
+            run: |
+              curl -s \
+                --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
+                --form-string "user=${{ secrets.PUSHOVER_API_KEY }}" \
+                --form-string "message=VM and VNET deployed" \
+                https://api.pushover.net/1/messages.json
+
+# ----- input: ssh -----
+
+          - name: ssh into the machine
+            if: ${{ github.event.client_payload.connection == 'ssh' || github.event.inputs.connection == 'ssh' }}
+            run: |
+              chmod 600 ~/.ssh/id_rsa
+              ssh -i ~/.ssh/id_rsa azureuser@${{ env.VM_IP_ADDRESS }}
+              echo "hello from the machine"
+
