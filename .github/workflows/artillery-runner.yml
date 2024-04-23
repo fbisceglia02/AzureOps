@@ -1,0 +1,18 @@
+name: Artillery test
+#comment
+on:
+  workflow_dispatch:
+  
+jobs:
+  create-rg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Azure Custom Login
+        shell: bash
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Install artillery
+        shell: bash
+        run: |    
+          curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -; sudo apt-get install -y nodejs; sudo npm install -g npm@latest; sudo npm install -g artillery
