@@ -10,12 +10,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Install artillery
-        if: false
         shell: bash
         run: curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -; sudo apt-get install -y nodejs; sudo npm install -g npm@latest; sudo npm install -g artillery
       - name: Run test
         shell: bash
         run: |
-          echo "current dir" && pwd
-          echo "---content---"
-          ls
+          cd artillery
+          artillery run basic-test.yml
