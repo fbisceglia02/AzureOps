@@ -15,7 +15,7 @@ jobs:
         run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}        
       - name: Deploy resource group
         shell: bash
-        run: az group create --name icmelrg --location eastus           
+        run: az group create --name $RESOURCE_GROUP --location eastus           
   deploy-vms:
     needs: create-rg
     runs-on: ubuntu-latest
