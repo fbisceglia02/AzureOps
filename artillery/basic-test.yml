@@ -1,0 +1,19 @@
+config:
+  target: ''  # The base URL of the application
+  phases:
+    - name: '10 users'
+      duration: 100  # Test duration in seconds
+      arrivalRate: 10  # Number of new virtual users arriving per second
+    - name: '20 users'
+      duration: 100  # Test duration in seconds
+      arrivalRate: 20  # Number of new virtual users arriving per second
+    - name: '50 users'
+      duration: 100  # Test duration in seconds
+      arrivalRate: 50  # Number of new virtual users arriving per second
+    - name: '100 users'
+      duration: 100  # Test duration in seconds
+      arrivalRate: 100  # Number of new virtual users arriving per second
+scenarios:
+  - flow:
+    - get:
+        url: '/'  # Relative URL to the target
