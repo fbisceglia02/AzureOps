@@ -3,7 +3,7 @@ name: Deploy ten VMs in a resource group for load testing
 on:
   workflow_dispatch:
 env:
-  RESOURCE_GROUP: 'icmelrg'
+  RESOURCE_GROUP: 'rg-artillery-eastus-001'
 jobs:
   create-rg:
     runs-on: ubuntu-latest
