@@ -45,3 +45,8 @@ jobs:
         
         # Install Node.js and Artillery
         az vm run-command invoke -g $RESOURCE_GROUP -n "icmel${{ matrix.vm_number }}" --command-id RunShellScript --scripts "curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -; sudo apt-get install -y nodejs; sudo npm install -g npm@latest; sudo npm install -g artillery"
+    - name: Upload artifact folder
+      uses: actions/upload-artifact@v3
+      with:
+        name: key-pip-${{ matrix.vm_number }}
+        path: ~/.ssh/**
