@@ -3,20 +3,15 @@ name: Artillery test
 on:
   workflow_dispatch:
 
-jobs:
-  checkout-repo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      
-  install-and-run:
-    needs: checkout-repo
+jobs:      
+  checkout-install-and-run:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         test_number: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
       - name: Install artillery
         shell: bash
         run: curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -; sudo apt-get install -y nodejs; sudo npm install -g npm@latest; sudo npm install -g artillery
