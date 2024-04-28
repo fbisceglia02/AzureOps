@@ -1,5 +1,5 @@
 config:
-  target: 'http://wapp-overloadtest-eastus-001.azurewebsites.net/'  # The base URL of the application
+  target: 'http://4.157.70.207/'  # The base URL of the application
   phases:
     - name: '10 users'
       duration: 100  # Test duration in seconds
