@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  create-rg:
+  checkout-repo:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
