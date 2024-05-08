@@ -1,5 +1,5 @@
 config:
-  target: 'http://4.236.218.246/'  # The base URL of the application
+  target: 'http://108.142.77.15:8080/'  # The base URL of the application
   phases:
     - name: '1000 users'
       duration: 100  # Test duration in seconds
@@ -9,5 +9,7 @@ config:
       arrivalRate: 5000  # Number of new virtual users arriving per second
 scenarios:
   - flow:
-    - get:
-        url: '/'  # Relative URL to the target
+      - post:
+          url: '/items'
+          json:
+            name: 'faccetta nera'
