@@ -149,6 +149,10 @@ jobs:
       - name: create a new subnet containing at least 250 available IP addresses and enable subnet delegation for the Application Gateway for Containers association resource if it doesn't exist
         shell: bash
         run: |
+          echo "VNET RESOURCE GROUP"
+          echo $VNET_RESOURCE_GROUP
+          exit 0
+
           SUBNET_EXISTS=$(az network vnet subnet list --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query "[?name=='$ALB_SUBNET_NAME']" --output tsv)
 
           if [[ -n $SUBNET_EXISTS ]]; then
