@@ -102,13 +102,19 @@ jobs:
         shell: bash
         run: |
             # Install ALB Controller using Helm
-            {
+            NAMESPACE_EXISTS=$(kubectl get namespaces | grep -w $HELM_NAMESPACE)
+            if [[ -n $NAMESPACE_EXISTS ]]; then
+              echo "Namespace '$HELM_NAMESPACE' already exists."
+            else
+              {
                 echo "line 1 of the step"
                 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME
                 kubectl create namespace $HELM_NAMESPACE
                 echo "line 2 of the step"
                 helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
-            }
+              }
+            fi
+
 
 
       - name: Verify ALB Controller installation
