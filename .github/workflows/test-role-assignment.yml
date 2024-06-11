@@ -1,0 +1,76 @@
+name: Test Role assignment
+#comment
+on:
+  workflow_dispatch:
+    inputs:
+        resource-group-name:
+          type: string
+          required: false
+          description: 'Name of the resource group where aks will be created'
+        aks-name:
+          type: string
+          required: false
+          description: 'Name of the aks will be created'
+
+jobs:
+  create-rg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Azure Custom Login
+        shell: bash
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Setup Variables
+        shell: bash
+        run: |
+          echo "RESOURCE_GROUP=${{ github.event.inputs.resource-group-name || 'ic-aks-rg' }}" >> $GITHUB_ENV
+
+          echo "AKS_NAME=${{ github.event.inputs.aks-name || 'ic-aks' }}" >> $GITHUB_ENV
+
+          echo "SUBSCRIPTION_ID=${{ 'c550fb2d-3f43-40b7-9e36-f1d47f436e42' }}" >> $GITHUB_ENV
+
+          echo "IDENTITY_RESOURCE_NAME=${{ 'azure-alb-identity' }}" >> $GITHUB_ENV
+
+          echo "HELM_NAMESPACE=${{ github.event.inputs.aks-name || 'ic-aks' }}" >> $GITHUB_ENV
+
+          echo "CONTROLLER_NAMESPACE=${{ 'azure-alb-system' }}" >> $GITHUB_ENV
+
+
+      - name: Register azure account and required resource providers
+        shell: bash
+        run: |
+          az account set --subscription $SUBSCRIPTION_ID
+
+          # Register required resource providers on Azure.
+          az provider register --namespace Microsoft.ContainerService
+          az provider register --namespace Microsoft.Network
+          az provider register --namespace Microsoft.NetworkFunction
+          az provider register --namespace Microsoft.ServiceNetworking
+
+          # Install Azure CLI extensions.
+          az extension add --name alb
+
+      - name: Test role assignment
+        shell: bash
+        run: |
+          {
+
+              # 1. Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
+              {
+                  mcResourceGroup=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_NAME --query "nodeResourceGroup" -o tsv)
+                  mcResourceGroupId=$(az group show --name $mcResourceGroup --query id -otsv)
+
+                  echo "Creating identity $IDENTITY_RESOURCE_NAME in resource group $RESOURCE_GROUP"
+                  az identity create --resource-group $RESOURCE_GROUP --name $IDENTITY_RESOURCE_NAME
+                  principalId="$(az identity show -g $RESOURCE_GROUP -n $IDENTITY_RESOURCE_NAME --query principalId -otsv)"
+
+                  echo "Waiting 60 seconds to allow for replication of the identity..."
+                  sleep 60
+
+                  echo "Apply Reader role to the AKS managed cluster resource group for the newly provisioned identity"
+                  az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader role
+              }
+
+
+          }
