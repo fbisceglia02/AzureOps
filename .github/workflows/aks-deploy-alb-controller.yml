@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           az group create --name $RESOURCE_GROUP --location eastus
-          OUTPUT=$(az aks list | jq -r '.[].name)
+          OUTPUT=$(az aks list | jq -r '.[].name')
 
             if [[ "$OUTPUT" == "$AKS_NAME" ]]; then
               echo "AKS cluster already exists"
