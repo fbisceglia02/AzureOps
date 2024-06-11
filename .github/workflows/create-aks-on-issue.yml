@@ -1,11 +1,12 @@
-name: Issue Trigger
+name: Issue Updated
 
 on:
   issues:
-    types: [opened]
+    types: [edited]
 
 jobs:
   process_issue:
+    if: github.event.issue.number == 24
     runs-on: ubuntu-latest
 
     steps:
