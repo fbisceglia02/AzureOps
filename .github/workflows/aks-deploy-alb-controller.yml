@@ -148,18 +148,30 @@ jobs:
           $VNET_RESOURCE_GROUP = $vnetData[1]
           $VNET_ID = $vnetData[2]
 
-          echo "CLUSTER_SUBNET_ID=$CLUSTER_SUBNET_ID" >> $env:GITHUB_ENV
-          echo "VNET_NAME=$VNET_NAME" >> $env:GITHUB_ENV
-          echo "VNET_RESOURCE_GROUP=$VNET_RESOURCE_GROUP" >> $env:GITHUB_ENV
-          echo "VNET_ID=$VNET_ID" >> $env:GITHUB_ENV
+          $jsonData = @{
+            CLUSTER_SUBNET_ID = $CLUSTER_SUBNET_ID
+            VNET_NAME = $VNET_NAME
+            VNET_RESOURCE_GROUP = $VNET_RESOURCE_GROUP
+            VNET_ID = $VNET_ID
+          } | ConvertTo-Json -Compress
+
+          $jsonData | Set-Content -Path "env_vars.json"
 
 
 
       - name: create a new subnet containing at least 250 available IP addresses and enable subnet delegation for the Application Gateway for Containers association resource if it doesn't exist
         shell: bash
         run: |
-          echo "VNET RESOURCE GROUP"
-          echo $VNET_RESOURCE_GROUP
+          env_vars=$(cat env_vars.json)
+          CLUSTER_SUBNET_ID=$(echo $env_vars | jq -r '.CLUSTER_SUBNET_ID')
+          VNET_NAME=$(echo $env_vars | jq -r '.VNET_NAME')
+          VNET_RESOURCE_GROUP=$(echo $env_vars | jq -r '.VNET_RESOURCE_GROUP')
+          VNET_ID=$(echo $env_vars | jq -r '.VNET_ID')
+
+          echo "CLUSTER_SUBNET_ID: $CLUSTER_SUBNET_ID"
+          echo "VNET_NAME: $VNET_NAME"
+          echo "VNET_RESOURCE_GROUP: $VNET_RESOURCE_GROUP"
+          echo "VNET_ID: $VNET_ID"
           exit 0
 
           SUBNET_EXISTS=$(az network vnet subnet list --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query "[?name=='$ALB_SUBNET_NAME']" --output tsv)
