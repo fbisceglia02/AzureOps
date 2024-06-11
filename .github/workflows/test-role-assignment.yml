@@ -51,6 +51,11 @@ jobs:
           # Install Azure CLI extensions.
           az extension add --name alb
 
+      - name: Create a vnet test
+        shell: bash
+        run: |
+          az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'
+
       - name: Test role assignment
         shell: bash
         run: |
