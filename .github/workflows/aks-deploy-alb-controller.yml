@@ -124,3 +124,61 @@ jobs:
 
               kubectl get gatewayclass azure-alb-external -o yaml && sleep 5         # Verify GatewayClass azure-application-lb is installed on your cluster:
           }
+
+      - name: Export MC RESOURCE GROUP ENV
+        shell: bash
+        run: |
+            MC_RESOURCE_GROUP=$(az aks show --name $AKS_NAME --resource-group $RESOURCE_GROUP --query "nodeResourceGroup" -otsv | tr -d '\r')
+            echo "MC_RESOURCE_GROUP=$MC_RESOURCE_GROUP" >> $GITHUB_ENV
+
+      - name: Export Environment Variables in powershell
+        shell: pwsh
+        run: |
+          $env:CLUSTER_SUBNET_ID = (az vmss list --resource-group $env:MC_RESOURCE_GROUP --query '[0].virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].subnet.id' -o tsv)
+          $vnet = az network vnet show --ids $env:CLUSTER_SUBNET_ID --query '[name, resourceGroup, id]' -o tsv
+          $env:VNET_NAME, $env:VNET_RESOURCE_GROUP, $env:VNET_ID = $vnet -split '\t'
+          echo "CLUSTER_SUBNET_ID=$env:CLUSTER_SUBNET_ID" >> $GITHUB_ENV
+          echo "VNET_NAME=$env:VNET_NAME" >> $GITHUB_ENV
+          echo "VNET_RESOURCE_GROUP=$env:VNET_RESOURCE_GROUP" >> $GITHUB_ENV
+          echo "VNET_ID=$env:VNET_ID" >> $GITHUB_ENV
+
+
+      - name: Create and assign a custom role
+        shell: bash
+        run: |
+          mcResourceGroupId=$(az group show --name $MC_RESOURCE_GROUP --query id -otsv)
+          principalId=$(az identity show -g $RESOURCE_GROUP -n $IDENTITY_RESOURCE_NAME --query principalId -otsv)
+          
+          # Delegate AppGw for Containers Configuration Manager role to AKS Managed Cluster RG
+          az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "fbc52c3f-28ad-4303-a892-8a056630b8f1" 
+          
+          # Delegate Network Contributor permission for join to association subnet
+          az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $ALB_SUBNET_ID --role "4d97b98b-1d4f-4787-a291-c67834d212e7" 
+        
+      - name: Create ApplicationLoadBalancer Kubernetes resource
+        shell: bash
+        run: |
+            echo "Define the Kubernetes namespace for the ApplicationLoadBalancer resource"
+            kubectl apply -f - <<EOF
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: alb-test-infra
+            EOF
+
+            echo "create the Application Gateway for Containers resource and association."
+            kubectl apply -f - <<EOF
+            apiVersion: alb.networking.azure.io/v1
+            kind: ApplicationLoadBalancer
+            metadata:
+              name: alb-test
+              namespace: alb-test-infra
+            spec:
+              associations:
+              - $ALB_SUBNET_ID
+            EOF
+
+      - name: Validate creation of the Application Gateway for Containers resources
+        shell: bash
+        run: |
+          kubectl get applicationloadbalancer alb-test -n alb-test-infra -o yaml -w
