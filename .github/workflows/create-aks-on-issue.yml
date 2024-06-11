@@ -1,0 +1,37 @@
+name: Issue Trigger
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process_issue:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get issue details
+      id: issue
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const body = issue.body;
+          return {body};
+
+    - name: Check cluster size
+      id: check_cluster_size
+      run: |
+        echo "Issue Body: ${{ steps.issue.outputs.body }}"
+        if [[ "${{ steps.issue.outputs.body }}" == *"- [x] Small"* ]]; then
+          echo "Cluster size: Small" > cluster_size.txt
+        elif [[ "${{ steps.issue.outputs.body }}" == *"- [x] Medium"* ]]; then
+          echo "Cluster size: Medium" > cluster_size.txt
+        elif [[ "${{ steps.issue.outputs.body }}" == *"- [x] Large"* ]]; then
+          echo "Cluster size: Large" > cluster_size.txt
+        else
+          echo "Cluster size: Undefined" > cluster_size.txt
+        fi
+
+    - name: Output cluster size
+      run: |
+        cat cluster_size.txt
