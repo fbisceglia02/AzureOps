@@ -146,10 +146,31 @@ jobs:
           echo "VNET_RESOURCE_GROUP=$env:VNET_RESOURCE_GROUP" >> $GITHUB_ENV
           echo "VNET_ID=$env:VNET_ID" >> $GITHUB_ENV
 
+      - name: create a new subnet containing at least 250 available IP addresses and enable subnet delegation for the Application Gateway for Containers association resource if it doesn't exist
+        shell: pwsh
+        run: |
+          SUBNET_EXISTS=$(az network vnet subnet list --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query "[?name=='$ALB_SUBNET_NAME']" --output tsv)
+
+          if [[ -n $SUBNET_EXISTS ]]; then
+            echo "Subnet '$ALB_SUBNET_NAME' already exists in VNet '$VNET_NAME'."
+          else
+            SUBNET_ADDRESS_PREFIX='<network address and prefix for an address space under the vnet that has at least 250 available addresses (/24 or larger subnet)>'
+            echo "SUBNET_ADDRESS_PREFIX=$SUBNET_ADDRESS_PREFIX" >> $GITHUB_ENV
+            
+            ALB_SUBNET_NAME='subnet-alb' # subnet name can be any non-reserved subnet name (i.e. GatewaySubnet, AzureFirewallSubnet, AzureBastionSubnet would all be invalid)
+            echo "ALB_SUBNET_NAME=$ALB_SUBNET_NAME" >> $GITHUB_ENV
+            
+            az network vnet subnet create --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --name $ALB_SUBNET_NAME --address-prefixes $SUBNET_ADDRESS_PREFIX --delegations 'Microsoft.ServiceNetworking/trafficControllers'
+            
+            ALB_SUBNET_ID=$(az network vnet subnet show --name $ALB_SUBNET_NAME --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query '[id]' --output tsv)
+            echo "ALB_SUBNET_ID=$ALB_SUBNET_ID" >> $GITHUB_ENV
+          fi
 
       - name: Create and assign a custom role
         shell: bash
         run: |
+          echo "ALB_SUBNET_ID is $ALB_SUBNET_ID"
+          exit 0
           mcResourceGroupId=$(az group show --name $MC_RESOURCE_GROUP --query id -otsv)
           principalId=$(az identity show -g $RESOURCE_GROUP -n $IDENTITY_RESOURCE_NAME --query principalId -otsv)
           
