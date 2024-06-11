@@ -32,9 +32,9 @@ jobs:
 
           echo "IDENTITY_RESOURCE_NAME=${{ 'azure-alb-identity' }}" >> $GITHUB_ENV
 
-          echo "HELM_NAMESPACE=${{ github.event.inputs.aks-name || 'ic-aks' }} >> $GITHUB_ENV
+          echo "HELM_NAMESPACE=${{ github.event.inputs.aks-name || 'ic-aks' }}" >> $GITHUB_ENV
 
-          CONTROLLER_NAMESPACE=${{ 'azure-alb-system' }} >> $GITHUB_ENV
+          echo "CONTROLLER_NAMESPACE=${{ 'azure-alb-system' }}" >> $GITHUB_ENV
 
       - name: Deploy resource group and AKS
         shell: bash
