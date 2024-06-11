@@ -68,7 +68,7 @@ jobs:
                 # -- Virtual Network --           
                 az network vnet create -g $RESOURCE_GROUP -n icvezvnet --address-prefix 10.0.0.0/16 --subnet-name icvezvnet_sub --location eastus --subnet-prefixes '10.0.0.0/24'       
                 # -- Virtual Machine --       
-                echo "IP_ADDRESS=$(az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose | jq -r '.publicIpAddress')" >> $GITHUB_ENV
+                echo "IP_ADDRESS=$(az vm create -n icezvm -g $RESOURCE_GROUP --image Ubuntu2204 --vnet-name icvezvnet --subnet icvezvnet_sub --location eastus --admin-username azureuser --generate-ssh-keys --output json --verbose --size Standard_DS2_v2 | jq -r '.publicIpAddress')" >> $GITHUB_ENV
 
 
    
