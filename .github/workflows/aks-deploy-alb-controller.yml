@@ -141,7 +141,7 @@ jobs:
         run: |
           echo "MC_RESOURCE GROOUP IS"
           echo $env:MC_RESOURCE_GROUP
-          $CLUSTER_SUBNET_ID = (az vmss list --resource-group $MC_RESOURCE_GROUP --query '[0].virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].subnet.id' -o tsv)
+          $CLUSTER_SUBNET_ID = (az vmss list --resource-group $env:MC_RESOURCE_GROUP --query '[0].virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].subnet.id' -o tsv)
           $vnet = az network vnet show --ids $CLUSTER_SUBNET_ID --query '[name, resourceGroup, id]' -o tsv
           $vnetData = $vnet -split "`t"
           $VNET_NAME = $vnetData[0]
