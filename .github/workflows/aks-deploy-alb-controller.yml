@@ -178,7 +178,7 @@ jobs:
           if [[ -n $SUBNET_EXISTS ]]; then
             echo "Subnet '$ALB_SUBNET_NAME' already exists in VNet '$VNET_NAME'."
           else
-            SUBNET_ADDRESS_PREFIX='<network address and prefix for an address space under the vnet that has at least 250 available addresses (/24 or larger subnet)>'
+            SUBNET_ADDRESS_PREFIX='10.225.0.0/24'
             echo "SUBNET_ADDRESS_PREFIX=$SUBNET_ADDRESS_PREFIX" >> $GITHUB_ENV
             
             ALB_SUBNET_NAME='subnet-alb' # subnet name can be any non-reserved subnet name (i.e. GatewaySubnet, AzureFirewallSubnet, AzureBastionSubnet would all be invalid)
