@@ -73,7 +73,6 @@ jobs:
           az aks update -g $RESOURCE_GROUP -n $AKS_NAME --enable-oidc-issuer --enable-workload-identity --no-wait
 
       - name: Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
-        if: false
         shell: bash
         run: |
           {
@@ -230,4 +229,5 @@ jobs:
       - name: Validate creation of the Application Gateway for Containers resources
         shell: bash
         run: |
-          kubectl get applicationloadbalancer alb-test -n alb-test-infra -o yaml -w
+          kubectl get applicationloadbalancer alb-test -n alb-test-infra -o yaml
+          sleep 10
