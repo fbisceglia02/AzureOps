@@ -73,6 +73,7 @@ jobs:
           az aks update -g $RESOURCE_GROUP -n $AKS_NAME --enable-oidc-issuer --enable-workload-identity --no-wait
 
       - name: Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
+        if: false
         shell: bash
         run: |
           {
@@ -138,13 +139,20 @@ jobs:
       - name: Export Environment Variables in PowerShell
         shell: pwsh
         run: |
-          $env:CLUSTER_SUBNET_ID = (az vmss list --resource-group $env:MC_RESOURCE_GROUP --query '[0].virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].subnet.id' -o tsv)
+          $CLUSTER_SUBNET_ID = (az vmss list --resource-group $env:MC_RESOURCE_GROUP --query '[0].virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].subnet.id' -o tsv)
           $vnet = az network vnet show --ids $env:CLUSTER_SUBNET_ID --query '[name, resourceGroup, id]' -o tsv
           $vnetData = $vnet -split "`t"
-          $env:VNET_NAME = $vnetData[0]
-          $env:VNET_RESOURCE_GROUP = $vnetData[1]
-          $env:VNET_ID = $vnetData[2]
+          $VNET_NAME = $vnetData[0]
+          $VNET_RESOURCE_GROUP = $vnetData[1]
+          $VNET_ID = $vnetData[2]
           
+          echo $CLUSTER_SUBNET_ID
+          echo $vnet
+          echo $vnetData
+          echo $VNET_NAME
+          echo $VNET_RESOURCE_GROUP
+          echo $VNET_ID
+
           echo "CLUSTER_SUBNET_ID=$env:CLUSTER_SUBNET_ID" >> $GITHUB_ENV
           echo "VNET_NAME=$env:VNET_NAME" >> $GITHUB_ENV
           echo "VNET_RESOURCE_GROUP=$env:VNET_RESOURCE_GROUP" >> $GITHUB_ENV
