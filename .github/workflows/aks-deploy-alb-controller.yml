@@ -39,9 +39,17 @@ jobs:
       - name: Deploy resource group and AKS
         shell: bash
         run: |
-          az group create --name $RESOURCE_GROUP --location eastus  
-          az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
-          az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing         
+          az group create --name $RESOURCE_GROUP --location eastus
+          OUTPUT=$(az aks list | jq -r '.[].name)
+
+            if [[ "$OUTPUT" == "$AKS_NAME" ]]; then
+              echo "AKS cluster already exists"
+            else
+              echo "Creating AKS cluster"
+              az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
+              az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
+            fi
+ 
 
       - name: Register azure account and required resource providers
         shell: bash
