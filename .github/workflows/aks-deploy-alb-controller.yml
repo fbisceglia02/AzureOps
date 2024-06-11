@@ -147,7 +147,7 @@ jobs:
           echo "VNET_ID=$env:VNET_ID" >> $GITHUB_ENV
 
       - name: create a new subnet containing at least 250 available IP addresses and enable subnet delegation for the Application Gateway for Containers association resource if it doesn't exist
-        shell: pwsh
+        shell: bash
         run: |
           SUBNET_EXISTS=$(az network vnet subnet list --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query "[?name=='$ALB_SUBNET_NAME']" --output tsv)
 
