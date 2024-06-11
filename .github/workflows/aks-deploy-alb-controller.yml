@@ -71,41 +71,45 @@ jobs:
           echo "Setting up an existing cluster as workload"
           az aks update -g $RESOURCE_GROUP -n $AKS_NAME --enable-oidc-issuer --enable-workload-identity --no-wait
 
-          # Install the ALB controller
+      - name: Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
+        shell: bash
+        run: |
           {
+              mcResourceGroup=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_NAME --query "nodeResourceGroup" -o tsv)
+              mcResourceGroupId=$(az group show --name $mcResourceGroup --query id -otsv)
 
-              # 1. Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
-              {
-                  mcResourceGroup=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_NAME --query "nodeResourceGroup" -o tsv)
-                  mcResourceGroupId=$(az group show --name $mcResourceGroup --query id -otsv)
+              echo "Creating identity $IDENTITY_RESOURCE_NAME in resource group $RESOURCE_GROUP"
+              az identity create --resource-group $RESOURCE_GROUP --name $IDENTITY_RESOURCE_NAME
+              principalId="$(az identity show -g $RESOURCE_GROUP -n $IDENTITY_RESOURCE_NAME --query principalId -otsv)"
 
-                  echo "Creating identity $IDENTITY_RESOURCE_NAME in resource group $RESOURCE_GROUP"
-                  az identity create --resource-group $RESOURCE_GROUP --name $IDENTITY_RESOURCE_NAME
-                  principalId="$(az identity show -g $RESOURCE_GROUP -n $IDENTITY_RESOURCE_NAME --query principalId -otsv)"
+              echo "Waiting 60 seconds to allow for replication of the identity..."
+              sleep 60
 
-                  echo "Waiting 60 seconds to allow for replication of the identity..."
-                  sleep 60
+              echo "Apply Reader role to the AKS managed cluster resource group for the newly provisioned identity"
+              az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader role
 
-                  echo "Apply Reader role to the AKS managed cluster resource group for the newly provisioned identity"
-                  az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader role
-
-                  echo "Set up federation with AKS OIDC issuer"
-                  AKS_OIDC_ISSUER="$(az aks show -n "$AKS_NAME" -g "$RESOURCE_GROUP" --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-                  az identity federated-credential create --name "azure-alb-identity" \
-                      --identity-name "$IDENTITY_RESOURCE_NAME" \
-                      --resource-group $RESOURCE_GROUP \
-                      --issuer "$AKS_OIDC_ISSUER" \
-                      --subject "system:serviceaccount:azure-alb-system:alb-controller-sa"
-              }
-
-              # Install ALB Controller using Helm
-              {
-                  az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME
-                  helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
-              }
-
+              echo "Set up federation with AKS OIDC issuer"
+              AKS_OIDC_ISSUER="$(az aks show -n "$AKS_NAME" -g "$RESOURCE_GROUP" --query "oidcIssuerProfile.issuerUrl" -o tsv)"
+              az identity federated-credential create --name "azure-alb-identity" \
+                  --identity-name "$IDENTITY_RESOURCE_NAME" \
+                  --resource-group $RESOURCE_GROUP \
+                  --issuer "$AKS_OIDC_ISSUER" \
+                  --subject "system:serviceaccount:azure-alb-system:alb-controller-sa"
           }
 
+      - name: Install ALB Controller using Helm
+        shell: bash
+        run: |
+            # Install ALB Controller using Helm
+            {
+                az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME
+                helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
+            }
+
+
+      - name: Verify ALB Controller installation
+        shell: bash
+        run: |
           # Verify ALB Controller installation
           {
 
