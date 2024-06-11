@@ -155,10 +155,10 @@ jobs:
           echo $VNET_RESOURCE_GROUP
           echo $VNET_ID
 
-          echo "CLUSTER_SUBNET_ID=$CLUSTER_SUBNET_ID" >> $GITHUB_ENV
-          echo "VNET_NAME=$VNET_NAME" >> $GITHUB_ENV
-          echo "VNET_RESOURCE_GROUP=$VNET_RESOURCE_GROUP" >> $GITHUB_ENV
-          echo "VNET_ID=$VNET_ID" >> $GITHUB_ENV
+          echo "CLUSTER_SUBNET_ID=$CLUSTER_SUBNET_ID" >> $env:GITHUB_ENV
+          echo "VNET_NAME=$VNET_NAME" >> $env:GITHUB_ENV
+          echo "VNET_RESOURCE_GROUP=$VNET_RESOURCE_GROUP" >> $env:GITHUB_ENV
+          echo "VNET_ID=$VNET_ID" >> $env:GITHUB_ENV
 
 
       - name: create a new subnet containing at least 250 available IP addresses and enable subnet delegation for the Application Gateway for Containers association resource if it doesn't exist
