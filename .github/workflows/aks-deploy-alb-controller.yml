@@ -172,7 +172,6 @@ jobs:
           echo "VNET_NAME: $VNET_NAME"
           echo "VNET_RESOURCE_GROUP: $VNET_RESOURCE_GROUP"
           echo "VNET_ID: $VNET_ID"
-          exit 0
 
           SUBNET_EXISTS=$(az network vnet subnet list --resource-group $VNET_RESOURCE_GROUP --vnet-name $VNET_NAME --query "[?name=='$ALB_SUBNET_NAME']" --output tsv)
 
