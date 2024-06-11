@@ -7,8 +7,17 @@ assignees: fbisceglia02
 
 ---
 
+---
+name: Cluster Request
+about: Request a new cluster
+title: '[Cluster Request]'
+labels: ''
+assignees: ''
+
+---
+
 ### Cluster Size
 Specify the desired cluster size:
-- Small
-- Medium
-- Large
+- [ ] Small
+- [ ] Medium
+- [ ] Large
