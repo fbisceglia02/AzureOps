@@ -107,10 +107,8 @@ jobs:
             if [[ -n $NAMESPACE_EXISTS ]]; then
               echo "Namespace '$HELM_NAMESPACE' already exists."
             else
-              {
                 kubectl create namespace $HELM_NAMESPACE
                 helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
-              }
             fi
 
 
