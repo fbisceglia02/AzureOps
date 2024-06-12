@@ -111,7 +111,13 @@ jobs:
 
             echo "printing all the namespaces"
             kubectl get namespaces
-            exit 0 
+
+            
+            echo "creating namespace with HELM_NAMESPACE name"
+            kubectl create namespace $HELM_NAMESPACE
+            
+            echo "printing all the namespaces AGAIN"
+            kubectl get namespaces
             
             # Install ALB Controller using Helm
             NAMESPACE_EXISTS=$(kubectl get namespaces | grep -w $HELM_NAMESPACE) # problem here
