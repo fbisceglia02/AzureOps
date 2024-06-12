@@ -105,13 +105,20 @@ jobs:
             echo "doing aks get credentials"
             az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME
             echo "aks get credentials done"
+
             echo "printing HELM_NAMESPACE:"
             echo $HELM_NAMESPACE
+
+            echo "printing all the namespaces"
+            kubectl get namespaces
+            exit 0 
+            
             # Install ALB Controller using Helm
-            NAMESPACE_EXISTS=$(kubectl get namespaces | grep -w $HELM_NAMESPACE)
+            NAMESPACE_EXISTS=$(kubectl get namespaces | grep -w $HELM_NAMESPACE) # problem here
             echo "NAMESPACE_EXISTS variable assigned1"
             echo "printing NAMESPACE_EXISTS:"
             echo $NAMESPACE_EXISTS
+
             if [[ -n $NAMESPACE_EXISTS ]]; then
               echo "entered if true condition"
               echo "Namespace '$HELM_NAMESPACE' already exists."
