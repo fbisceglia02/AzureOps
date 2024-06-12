@@ -243,3 +243,67 @@ jobs:
         run: |
           kubectl get applicationloadbalancer alb-test -n alb-test-infra -o yaml
           sleep 10
+
+      - name: Apply sample deployment
+        shell: bash
+        run: kubectl apply -f https://trafficcontrollerdocs.blob.core.windows.net/examples/traffic-split-scenario/deployment.yaml
+      
+      - name: Deploy required Gateway API resources
+        shell: bash
+        run: |
+          kubectl apply -f - <<EOF
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: Gateway
+            metadata:
+              name: gateway-01
+              namespace: test-infra
+              annotations:
+                alb.networking.azure.io/alb-namespace: alb-test-infra
+                alb.networking.azure.io/alb-name: alb-test
+            spec:
+              gatewayClassName: azure-alb-external
+              listeners:
+              - name: http
+                port: 80
+                protocol: HTTP
+                allowedRoutes:
+                  namespaces:
+                    from: Same
+            EOF
+            echo "check successfull gateway cration"
+            kubectl get gateway gateway-01 -n test-infra -o yaml
+            sleep 5
+
+      - name: Create an HTTP Route
+        shell: bash
+        run: | 
+          kubectl apply -f - <<EOF
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: traffic-split-route
+            namespace: test-infra
+          spec:
+            parentRefs:
+            - name: gateway-01
+            rules:
+            - backendRefs:
+              - name: backend-v1
+                port: 8080
+                weight: 50
+              - name: backend-v2
+                port: 8080
+                weight: 50
+          EOF
+          echo "Ensure the route is accepted adn the app gw for containers is programmed"
+          kubectl get httproute traffic-split-route -n test-infra -o yaml
+          sleep 5
+      - name: Testing access to the application
+        shell: bash
+        run: | 
+          fqdn=$(kubectl get gateway gateway-01 -n test-infra -o jsonpath='{.status.addresses[0].value}')
+          # this curl command will return 50% of the responses from backend-v1
+          # and the remaining 50% of the responses from backend-v2
+          watch -n 1 curl http://$fqdn
+          watch -n 1 curl http://$fqdn
+          watch -n 1 curl http://$fqdn
