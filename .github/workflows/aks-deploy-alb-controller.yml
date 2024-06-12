@@ -104,6 +104,8 @@ jobs:
             echo "doing aks get credentials"
             az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME
             echo "aks get credentials done"
+            echo "printing HELM_NAMESPACE:"
+            echo $HELM_NAMESPACE
             # Install ALB Controller using Helm
             NAMESPACE_EXISTS=$(kubectl get namespaces | grep -w $HELM_NAMESPACE)
             if [[ -n $NAMESPACE_EXISTS ]]; then
