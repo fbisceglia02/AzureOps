@@ -269,7 +269,7 @@ jobs:
                 allowedRoutes:
                   namespaces:
                     from: Same
-            EOF
+          EOF
             echo "check successfull gateway cration"
             kubectl get gateway gateway-01 -n test-infra -o yaml
             sleep 5
@@ -278,22 +278,22 @@ jobs:
         shell: bash
         run: | 
           kubectl apply -f - <<EOF
-          apiVersion: gateway.networking.k8s.io/v1
-          kind: HTTPRoute
-          metadata:
-            name: traffic-split-route
-            namespace: test-infra
-          spec:
-            parentRefs:
-            - name: gateway-01
-            rules:
-            - backendRefs:
-              - name: backend-v1
-                port: 8080
-                weight: 50
-              - name: backend-v2
-                port: 8080
-                weight: 50
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: traffic-split-route
+              namespace: test-infra
+            spec:
+              parentRefs:
+              - name: gateway-01
+              rules:
+              - backendRefs:
+                - name: backend-v1
+                  port: 8080
+                  weight: 50
+                - name: backend-v2
+                  port: 8080
+                  weight: 50
           EOF
           echo "Ensure the route is accepted adn the app gw for containers is programmed"
           kubectl get httproute traffic-split-route -n test-infra -o yaml
