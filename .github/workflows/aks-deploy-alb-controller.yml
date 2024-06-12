@@ -74,6 +74,7 @@ jobs:
 
       - name: Create a user managed identity for ALB controller and federate the identity as workload identity to use in the AKS cluster
         shell: bash
+        if: false
         run: |
           {
               mcResourceGroup=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_NAME --query "nodeResourceGroup" -o tsv)
