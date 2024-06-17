@@ -30,7 +30,7 @@ jobs:
 
           echo "AKS_NAME=${{ github.event.inputs.aks-name || 'ic-aks' }}" >> $GITHUB_ENV
 
-          echo "SUBSCRIPTION_ID=${{ 'c550fb2d-3f43-40b7-9e36-f1d47f436e42' }}" >> $GITHUB_ENV
+          echo "SUBSCRIPTION_ID=$(az account list | jq -r '.[0].id')" >> $GITHUB_ENV
 
           echo "IDENTITY_RESOURCE_NAME=${{ 'azure-alb-identity' }}" >> $GITHUB_ENV
 
@@ -88,6 +88,8 @@ jobs:
 
               echo "Apply Reader role to the AKS managed cluster resource group for the newly provisioned identity"
               az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "acdd72a7-3385-48ef-bd42-f606fba81ae7" # Reader role
+              echo "Apply Microsoft.Authorization/roleAssignments/write role to the AKS managed cluster resource group for the newly provisioned identity"
+              az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --scope $mcResourceGroupId --role "3edba951-2d8b-4aad-9c7d-d1454919d3cb" # Microsoft.Authorization/roleAssignments/write
 
               echo "Set up federation with AKS OIDC issuer"
               AKS_OIDC_ISSUER="$(az aks show -n "$AKS_NAME" -g "$RESOURCE_GROUP" --query "oidcIssuerProfile.issuerUrl" -o tsv)"
@@ -121,7 +123,7 @@ jobs:
             else
                 echo "entered else false condition"
                 kubectl create namespace $HELM_NAMESPACE
-                helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
+                helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE -n $HELM_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
             fi
 
 

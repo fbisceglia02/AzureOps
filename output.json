@@ -1,0 +1,544 @@
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:16:59.775192221Z",
+  "message": "Starting alb-controller"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:16:59.778726665Z",
+  "message": "Starting alb-controller version 1.0.2"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:16:59.914048383Z",
+  "message": "attempting to acquire leader lease azure-alb-system/alb-controller-leader-election...\n"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:16:59.929292376Z",
+  "message": "successfully acquired lease azure-alb-system/alb-controller-leader-election\n"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "name": "events",
+  "type": "Normal",
+  "object": {
+    "kind": "Lease",
+    "namespace": "azure-alb-system",
+    "name": "alb-controller-leader-election",
+    "uid": "4d8a0f92-6408-4c59-8b3a-a4dd662c90f8",
+    "apiVersion": "coordination.k8s.io/v1",
+    "resourceVersion": "18355"
+  },
+  "reason": "LeaderElection",
+  "Timestamp": "2024-06-17T08:16:59.929744582Z",
+  "message": "alb-controller-78544bcf49-lvh47_a3da1a5f-69c3-403e-8106-9064b9bc94db became leader"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.ApplicationLoadBalancer",
+  "Timestamp": "2024-06-17T08:16:59.930139087Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.GatewayClass",
+  "Timestamp": "2024-06-17T08:16:59.930162387Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.Gateway",
+  "Timestamp": "2024-06-17T08:16:59.930167987Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.HTTPRoute",
+  "Timestamp": "2024-06-17T08:16:59.930296089Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1beta1.ReferenceGrant",
+  "Timestamp": "2024-06-17T08:16:59.93038389Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.BackendTLSPolicy",
+  "Timestamp": "2024-06-17T08:16:59.930449191Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.FrontendTLSPolicy",
+  "Timestamp": "2024-06-17T08:16:59.930599893Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.RoutePolicy",
+  "Timestamp": "2024-06-17T08:16:59.930612693Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.HealthCheckPolicy",
+  "Timestamp": "2024-06-17T08:16:59.930619993Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.IngressClass",
+  "Timestamp": "2024-06-17T08:16:59.930699594Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.Ingress",
+  "Timestamp": "2024-06-17T08:16:59.930792295Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.IngressExtension",
+  "Timestamp": "2024-06-17T08:16:59.930868496Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.Service",
+  "Timestamp": "2024-06-17T08:16:59.930880496Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.Secret",
+  "Timestamp": "2024-06-17T08:16:59.930958197Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.EndpointSlice",
+  "Timestamp": "2024-06-17T08:16:59.931047898Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "source": "kind source: *v1.Namespace",
+  "Timestamp": "2024-06-17T08:16:59.931061299Z",
+  "message": "Starting EventSource"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "Timestamp": "2024-06-17T08:16:59.931064999Z",
+  "message": "Starting Controller"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "worker count": 1,
+  "Timestamp": "2024-06-17T08:17:00.03680664Z",
+  "message": "Starting workers"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "traffic-split-route",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "traffic-split-route",
+  "reconcileID": "010dcee1-cbba-4a94-a1d4-bcd810bc272a",
+  "Timestamp": "2024-06-17T08:17:00.037173745Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037207046Z",
+  "message": "Received request for object test-infra/traffic-split-route"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "traffic-split-route",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "traffic-split-route",
+  "reconcileID": "010dcee1-cbba-4a94-a1d4-bcd810bc272a",
+  "Timestamp": "2024-06-17T08:17:00.037216846Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v1-tc76b",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v1-tc76b",
+  "reconcileID": "d5776ad1-e348-4a3c-b6fa-fc4f6850b8bb",
+  "Timestamp": "2024-06-17T08:17:00.037418748Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037444449Z",
+  "message": "Received request for object test-infra/backend-v1-tc76b"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v1-tc76b",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v1-tc76b",
+  "reconcileID": "d5776ad1-e348-4a3c-b6fa-fc4f6850b8bb",
+  "Timestamp": "2024-06-17T08:17:00.037451149Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v2-ghxnp",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v2-ghxnp",
+  "reconcileID": "a52ddb51-6a77-4609-b83f-59e9a5eb0388",
+  "Timestamp": "2024-06-17T08:17:00.037626051Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037635751Z",
+  "message": "Received request for object test-infra/backend-v2-ghxnp"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v2-ghxnp",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v2-ghxnp",
+  "reconcileID": "a52ddb51-6a77-4609-b83f-59e9a5eb0388",
+  "Timestamp": "2024-06-17T08:17:00.037638551Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "alb-test",
+    "namespace": "alb-test-infra"
+  },
+  "namespace": "alb-test-infra",
+  "name": "alb-test",
+  "reconcileID": "183880af-9859-408a-91b4-d9ea391131dd",
+  "Timestamp": "2024-06-17T08:17:00.037665951Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037684252Z",
+  "message": "Received request for object alb-test-infra/alb-test"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "alb-test",
+    "namespace": "alb-test-infra"
+  },
+  "namespace": "alb-test-infra",
+  "name": "alb-test",
+  "reconcileID": "183880af-9859-408a-91b4-d9ea391131dd",
+  "Timestamp": "2024-06-17T08:17:00.037687452Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "azure-alb-external"
+  },
+  "namespace": "",
+  "name": "azure-alb-external",
+  "reconcileID": "2bb1a373-286b-46d5-aded-064981fd8900",
+  "Timestamp": "2024-06-17T08:17:00.037699752Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037702252Z",
+  "message": "Received request for object /azure-alb-external"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "azure-alb-external"
+  },
+  "namespace": "",
+  "name": "azure-alb-external",
+  "reconcileID": "2bb1a373-286b-46d5-aded-064981fd8900",
+  "Timestamp": "2024-06-17T08:17:00.037704452Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "gateway-01",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "gateway-01",
+  "reconcileID": "49753b05-3971-4360-af1c-120f95a2c773",
+  "Timestamp": "2024-06-17T08:17:00.037714852Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037719952Z",
+  "message": "Received request for object test-infra/gateway-01"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "gateway-01",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "gateway-01",
+  "reconcileID": "49753b05-3971-4360-af1c-120f95a2c773",
+  "Timestamp": "2024-06-17T08:17:00.037722152Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "test-infra"
+  },
+  "namespace": "",
+  "name": "test-infra",
+  "reconcileID": "bbbe8c16-169f-4457-902e-5ae30eff06f4",
+  "Timestamp": "2024-06-17T08:17:00.037755652Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037759453Z",
+  "message": "Received request for object /test-infra"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "test-infra"
+  },
+  "namespace": "",
+  "name": "test-infra",
+  "reconcileID": "bbbe8c16-169f-4457-902e-5ae30eff06f4",
+  "Timestamp": "2024-06-17T08:17:00.037761953Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.037787153Z",
+  "message": "Processing requested object test-infra/traffic-split-route"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v2",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v2",
+  "reconcileID": "fa13fe4c-d195-4262-9f76-6577ec7237f6",
+  "Timestamp": "2024-06-17T08:17:00.038036456Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.038140357Z",
+  "message": "Received request for object test-infra/backend-v2"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v2",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v2",
+  "reconcileID": "fa13fe4c-d195-4262-9f76-6577ec7237f6",
+  "Timestamp": "2024-06-17T08:17:00.038149557Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v1",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v1",
+  "reconcileID": "eb218be8-feaa-4bdf-b73d-8fc218b3ff57",
+  "Timestamp": "2024-06-17T08:17:00.038167958Z",
+  "message": "Reconciling"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.038171558Z",
+  "message": "Received request for object test-infra/backend-v1"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "controller": "lb-resources-reconciler",
+  "object": {
+    "name": "backend-v1",
+    "namespace": "test-infra"
+  },
+  "namespace": "test-infra",
+  "name": "backend-v1",
+  "reconcileID": "eb218be8-feaa-4bdf-b73d-8fc218b3ff57",
+  "Timestamp": "2024-06-17T08:17:00.038174158Z",
+  "message": "Reconcile successful"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.139425443Z",
+  "message": "Successfully processed object test-infra/traffic-split-route"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "operationID": "fe7f4af8-4555-4ecf-ba4f-98a4a5fdb4e0",
+  "Timestamp": "2024-06-17T08:17:00.139449443Z",
+  "message": "Starting event handler for Application Gateway for Containers resource alb-test-infra/alb-test"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "AGC": "alb-test-infra/alb-test",
+  "operationID": "fe7f4af8-4555-4ecf-ba4f-98a4a5fdb4e0",
+  "Timestamp": "2024-06-17T08:17:00.139458443Z",
+  "message": "Creating new Application Gateway for Containers resource Handler"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.140250353Z",
+  "message": "Processing requested object test-infra/backend-v1"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.140844861Z",
+  "message": "Successfully processed object test-infra/backend-v1"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "AGC": "alb-test-infra/alb-test",
+  "Timestamp": "2024-06-17T08:17:00.140886761Z",
+  "message": "Deploying Application Gateway for Containers resource: alb-test-infra/alb-test"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.141500069Z",
+  "message": "Getting Application Gateway for Containers resource /subscriptions/c550fb2d-3f43-40b7-9e36-f1d47f436e42/resourceGroups/mc_rg-fb-eastus-test-001_aks-fb-eastus-test-001_eastus/providers/Microsoft.ServiceNetworking/trafficControllers/alb-5e644a9c"
+}
+{
+  "level": "info",
+  "version": "1.0.2",
+  "Timestamp": "2024-06-17T08:17:00.787477372Z",
+  "message": "Creating Application Gateway for Containers resource alb-5e644a9c from CRD alb-test-infra/alb-test in RG mc_rg-fb-eastus-test-001_aks-fb-eastus-test-001_eastus"
+}
