@@ -136,7 +136,7 @@ jobs:
               echo "getting cluster credentials"
               az aks get-credentials -n $AKS_NAME -g $RESOURCE_GROUP
 
-              kubectl get pods -n azure-alb-system && sleep 5                        # Verify the ALB Controller pods are ready
+              kubectl get pods -n azure-alb-system && sleep 15                        # Verify the ALB Controller pods are ready
 
               kubectl get gatewayclass azure-alb-external -o yaml && sleep 5         # Verify GatewayClass azure-application-lb is installed on your cluster:
           }
