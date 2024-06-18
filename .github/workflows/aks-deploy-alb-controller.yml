@@ -41,16 +41,31 @@ jobs:
       - name: Deploy resource group and AKS
         shell: bash
         run: |
-          az group create --name $RESOURCE_GROUP --location eastus
-          OUTPUT=$(az aks list | jq -r '.[].name')
+          # CHECKING RESOURCE GROUP EXISTENCE
+          while IFS= read -r line; do resource_group_names+=("$line"); done < <(az group list | jq -r '.[].name')
 
-            if [[ "$OUTPUT" == "$AKS_NAME" ]]; then
-              echo "AKS cluster already exists"
-            else
+          # Check if RESOURCE_GROUP exists in resource_group_names array
+          if [[ " ${resource_group_names[@]} " =~ " ${RESOURCE_GROUP} " ]]; then
+              echo "$RESOURCE_GROUP exists in the list of resource groups."
+              while IFS= read -r line; do aks_names+=("$line"); done < <(az aks list -g $RESOURCE_GROUP | jq -r '.[].name')
+              # Check if AKS_NAME exists in aks_names array
+              if [[ " ${aks_names[@]} " =~ " ${AKS_NAME} " ]]; then
+                  echo "$AKS_NAME exists in the list of AKS instances."
+              else
+                  echo "Creating AKS cluster"
+                  az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
+                  az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
+              fi
+
+          else
+              echo "$RESOURCE_GROUP does not exist in the list of resource groups."
+              az group create --name $RESOURCE_GROUP --location eastus
               echo "Creating AKS cluster"
               az aks create -n $AKS_NAME -g $RESOURCE_GROUP -l eastus --generate-ssh-keys
               az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
-            fi
+          fi
+
+          
  
       - name: Register azure account and required resource providers
         shell: bash
