@@ -8,9 +8,9 @@ on:
         required: false
         type: choice
         options:
+        - 'none'
         - 'vm-vnet-ez'
         - 'two-vm-vnet'
-        - 'none'
       resource-group-name:
         type: string
         required: false
@@ -26,14 +26,14 @@ jobs:
       - name: Azure Custom Login
         shell: bash
         run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZ_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az login --service-principal -u ${{ secrets.APP_REG_CLIENT_ID }} -p ${{ secrets.APP_REG_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
         
       - name: Erase Infrastructure
         shell: bash
         run: |
           deleteResourceGroups() {
             local resourceGroup=$1
-            if [ "$resourceGroup" = "clear-all" ] || [ -z "$resourceGroup" ]; then
+            if [ "$resourceGroup" = "clear-all" ]; then
               echo "Attempting to clear all resource groups..."
               local resourceGroupsToDelete=$(az group list | jq -r '.[].name | select(. != "--help" and . != "NetworkWatcherRG")')
               
