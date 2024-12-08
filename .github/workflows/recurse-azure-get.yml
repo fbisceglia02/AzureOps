@@ -1,1 +1,46 @@
+name: Azure Resource Groups Resources Log
+
+on:
+  workflow_dispatch: # Trigger manually
+
+jobs:
+  log-resources:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository (optional, if saving logs to the repo)
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Azure Login
+      - name: Azure Login
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZ_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      # Step 3: Fetch resources for all resource groups
+      - name: Fetch Resources for All Resource Groups
+        run: |
+          # Fetch all resource groups in the subscription
+          RESOURCE_GROUPS=$(az group list --query '[].name' -o tsv)
+          
+          # Iterate through each resource group and fetch its resources
+          for RG in $RESOURCE_GROUPS; do
+            echo "Fetching resources for Resource Group: $RG"
+            
+            # Save details of the resource group to a log file
+            az group show --name $RG --output json > "${RG}_log.json"
+            
+            # Save resources in the resource group to the same log file
+            az resource list --resource-group $RG --output json >> "${RG}_log.json"
+          done
+
+      # Step 4: Upload logs as artifacts (optional)
+      - name: Upload Resource Group Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: resource-group-logs
+          path: "*.json"
 
