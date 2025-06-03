@@ -2,19 +2,7 @@ name: Terraform State StorageAccount create
 
 on:
   workflow_dispatch:
-    inputs:
-      trigger:
-        description: 'trigger other workflows after it'
-        required: false
-        type: choice
-        options:
-        - 'none'
-        - 'vm-vnet-ez'
-        - 'two-vm-vnet'
-      resource-group-name:
-        type: string
-        required: false
-        description: 'Name of the resource group to erase, enter "clear-all" to clear them all'
+    
 
 jobs:
   erase-infrastructure:
