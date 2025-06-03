@@ -138,6 +138,9 @@ jobs:
                 echo "entered else false condition"
                 kubectl create namespace $HELM_NAMESPACE
                 helm install alb-controller oci://mcr.microsoft.com/application-lb/charts/alb-controller --version 1.0.2 --set albController.namespace=$CONTROLLER_NAMESPACE -n $HELM_NAMESPACE --set albController.podIdentity.clientID=$(az identity show -g $RESOURCE_GROUP -n azure-alb-identity --query clientId -o tsv)
+
+                echo "waiting 15 seconds for the creations of the pods and ALB installation"
+                sleep 15
             fi
 
 

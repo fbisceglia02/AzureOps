@@ -1,0 +1,66 @@
+name: Terraform State StorageAccount create
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: 'trigger other workflows after it'
+        required: false
+        type: choice
+        options:
+        - 'none'
+        - 'vm-vnet-ez'
+        - 'two-vm-vnet'
+      resource-group-name:
+        type: string
+        required: false
+        description: 'Name of the resource group to erase, enter "clear-all" to clear them all'
+
+jobs:
+  erase-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Azure Custom Login
+        shell: bash
+        run: |
+          az login --service-principal -u ${{ secrets.APP_REG_CLIENT_ID }} -p ${{ secrets.APP_REG_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+        
+      - name: Create terraform storage account
+        shell: bash
+        run: |
+          resourceGroup='tf-state-mgmt'
+          region='italynorth'
+          storageAccount='mytfstatestorageferrux'
+          container='tfstate'
+
+          # Check if the resource group exists
+          if ! az group show --name "$resourceGroup" &> /dev/null; then
+              echo "Resource group '$resourceGroup' does not exist. Creating resources..."
+              # Create resource group
+              az group create -n "$resourceGroup" -l "$region"
+
+              # Create storage account
+              az storage account create \
+                  --name "$storageAccount" \
+                  --resource-group "$resourceGroup" \
+                  --location "$region" \
+                  --sku Standard_LRS \
+                  --kind StorageV2
+
+              # Get storage account key
+              accountKey=$(az storage account keys list \
+                  --resource-group "$resourceGroup" \
+                  --account-name "$storageAccount" \
+                  --query '[0].value' -o tsv)
+
+              # Create blob container
+              az storage container create \
+                  --name "$container" \
+                  --account-name "$storageAccount" \
+                  --account-key "$accountKey"
+          else
+              echo "Resource group '$resourceGroup' already exists. No resources created."
+          fi
